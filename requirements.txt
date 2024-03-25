@@ -1,0 +1,11 @@
+numpy
+#queue
+cv2
+streamlit
+av
+requests
+PIL
+io
+mediapipe
+streamlit_webrtc
+json
