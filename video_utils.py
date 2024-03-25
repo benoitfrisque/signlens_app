@@ -1,16 +1,16 @@
 import math
-import streamlit as st
 import cv2
 import mediapipe as mp
 import numpy as np
 import tempfile
-import json
 
 from google.protobuf.json_format import MessageToDict
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe import solutions
 
-from signlens_app.params import N_LANDMARKS_HAND, N_LANDMARKS_POSE #, LANDMARKS_VIDEO_DIR
+
+N_LANDMARKS_HAND = 21
+N_LANDMARKS_POSE = 33
 
 mp_pose = mp.solutions.pose
 mp_hands = mp.solutions.hands
