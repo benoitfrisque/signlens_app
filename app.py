@@ -1,15 +1,15 @@
+#from io import BytesIO
+#import json
 import streamlit as st
-import cv2
+#import cv2
 import requests
 #from PIL import Image
-from io import BytesIO
-from utils import *
-import json
-import mediapipe as mp
-import av
+#import mediapipe as mp
+#import av
+#from utils import *
 #from utils import process_video_to_landmarks_json
 from video_utils  import process_video_to_landmarks_json
-
+NUM_CLASSES=10
 st.set_page_config(page_title="SignLens Demo",
                                     page_icon="🎭", layout="centered",
                                     #initial_sidebar_state="expanded"
@@ -20,8 +20,16 @@ st.subheader("Sign Language translation")
 st.caption("using Mediapipe for Landmark extraction  and an RNN model for translation")
 
 # Open video file if uploaded
-video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "asf", "m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
-json_data = process_video_to_landmarks_json(video, json_output=False, save_annotated_video=False, show_preview=False, frame_interval=1, frame_limit=None, rear_camera=True, output_dir=None)
+video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv", "asf",
+    #"m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
+    "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
+
+if video:
+    landmarks = process_video_to_landmarks_json(video)
+    st.json(landmarks)
+    #json_data = process_video_to_landmarks_json(video) #, json_output=False,
+        #save_annotated_video=False, show_preview=False, frame_interval=1,
+        #frame_limit=None, rear_camera=True, output_dir=None)
 #response = requests.post("http://127.0.0.1:8000/api, json=json_data)
 #result = response.json()["result"]
 #st.success(f"Result: {result}")

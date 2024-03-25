@@ -1,14 +1,16 @@
-import os
-import json
-import numpy as np
-import mediapipe as mp
-import cv2
 import math
+import streamlit as st
+import cv2
+import mediapipe as mp
+import numpy as np
+import tempfile
+import json
+
 from google.protobuf.json_format import MessageToDict
 from mediapipe.framework.formats import landmark_pb2
 from mediapipe import solutions
 
-from signlens.params import N_LANDMARKS_HAND, N_LANDMARKS_POSE, LANDMARKS_VIDEO_DIR
+from signlens_app.params import N_LANDMARKS_HAND, N_LANDMARKS_POSE #, LANDMARKS_VIDEO_DIR
 
 mp_pose = mp.solutions.pose
 mp_hands = mp.solutions.hands
@@ -45,46 +47,30 @@ def serialize_landmarks(landmark_list):
     return landmarks
 
 
-def process_video_to_landmarks_json(video_path, json_output=True, save_annotated_video=False, show_preview=False, frame_interval=1, frame_limit=None, rear_camera=True, output_dir=LANDMARKS_VIDEO_DIR):
+def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=None, rear_camera=True):
     """
-    Process a video file and extract landmarks from each frame, then save the landmarks as JSON.
-    Inspired from https://github.com/google/mediapipe/blob/master/docs/solutions/hands.md
+    Process a video file and extract landmarks from each frame.
 
     Args:
-        video_path (str): The path to the video file.
-        json_output (bool, optional): Whether to save the landmarks as JSON. Defaults to True.
-        show_preview (bool, optional): Whether to show a preview of the processed frames. Defaults to True.
+        video_file (streamlit.uploaded_file_manager.UploadedFileManager): The uploaded video file.
         frame_interval (int, optional): The interval between processed frames. Defaults to 1.
         frame_limit (int, optional): The maximum number of frames to process. Defaults to None.
         rear_camera (bool, optional): Whether the video was recorded with a rear camera. Defaults to True.
-        output_dir (str, optional): The directory to save the landmarks JSON file. Defaults to LANDMARKS_VIDEO_DIR.
 
     Returns:
         list: A list of dictionaries containing the extracted landmarks for each frame.
-
-    Raises:
-        FileNotFoundError: If the video file specified by `video_path` does not exist.
-
-    Example:
-        video_path = '/path/to/video.mp4'
-        landmarks = process_video_to_landmarks_json(video_path, output=True, frame_interval=2, frame_limit=100)
-        print(landmarks)
     """
-    filename = os.path.splitext(os.path.basename(video_path))[0]
+    # Save the uploaded file to a temporary location
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(video_file.getbuffer())
+        video_path = tmp.name
 
-    # Open video file
-    if not os.path.exists(video_path):
-        raise FileNotFoundError(f"Video file '{video_path}' not found.")
-
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        print(f"Error opening video file '{video_path}'")
-        return
+    cap = cv2.VideoCapture(video_path, cv2.CAP_ANY) # for temp file solution
+    #cap = cv2.VideoCapture(video_file, cv2.CAP_ANY)
 
     json_data = []
     frame_number = 0
     processed_frames = 0
-    loop_complete = False
 
     # Get the fps of the original video
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -93,133 +79,67 @@ def process_video_to_landmarks_json(video_path, json_output=True, save_annotated
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    try:
-        if json_output:
-            # Prepare JSON file
-            os.makedirs(output_dir, exist_ok=True)
-            json_path = os.path.join(output_dir, f'{filename}_landmarks.json')
-            json_file = open(json_path, 'w', encoding='UTF8')
+    with mp_pose.Pose(static_image_mode=False) as pose, \
+            mp_hands.Hands(static_image_mode=False, max_num_hands=2) as hands:
+        while cap.isOpened():
+            success, frame = cap.read()
+            if not success:
+                break
 
-        # Initialize preview window
-        if show_preview:
-            cv2_window_name = f"Video {filename}"
-            cv2.namedWindow(cv2_window_name, cv2.WINDOW_NORMAL) # create empty window
-            move_window_to_center(cv2_window_name, frame_width, frame_height)
-
-        # Initialize video writer
-        if save_annotated_video:
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # or use 'XVID'
-            annotated_video_path = os.path.join(output_dir, f'{filename}_annotated.mp4')
-            out = cv2.VideoWriter(annotated_video_path, fourcc, fps, (frame_width, frame_height))
-
-        # Initialize an empty NormalizedLandmarkList for hand and pose
-        empty_hand_landmark_list = create_empty_landmark_list(N_LANDMARKS_HAND)
-        empty_pose_landmark_list = create_empty_landmark_list(N_LANDMARKS_POSE)
-
-        # Initialize mediapipe instances
-        with mp_pose.Pose(static_image_mode=False) as pose, \
-                mp_hands.Hands(static_image_mode=False, max_num_hands=2) as hands:
-            while cap.isOpened():
-                success, frame = cap.read()
-                if not success:
-                    break
-
-                # Skip frames based on frame_interval
-                if frame_number % frame_interval != 0:
-                    frame_number += 1
-                    continue
-
-                # Convert the BGR image to RGB
-                image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                # Process the image and extract landmarks
-                results_pose = pose.process(image_rgb)
-                results_hands = hands.process(image_rgb)
-
-                if show_preview or save_annotated_video:
-                    # Draw landmarks on the image
-                    annotated_image = draw_landmarks_on_image(image_rgb, results_pose, results_hands, rear_camera)
-                    annotated_image_color = cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR)
-
-                    if show_preview:
-                        cv2.imshow(cv2_window_name, annotated_image_color)
-                        if cv2.waitKey(1) & 0xFF == ord('q'):
-                            break
-
-                    if save_annotated_video:
-                        out.write(annotated_image_color)
-
-                # Extract landmarks for pose, left hand, and right hand
-                landmarks_pose = results_pose.pose_landmarks
-
-                # Check if there are any pose landmarks detected
-                if landmarks_pose is None:
-                    landmarks_pose = empty_pose_landmark_list
-
-                # Initialize empty hand landmarkks, then overwrite if it finds it
-                landmarks_left_hand = empty_hand_landmark_list
-                landmarks_right_hand = empty_hand_landmark_list
-
-                # Check if there are any hand landmarks detected
-                if results_hands.multi_hand_landmarks:
-                    # Get handedness of each hand
-                    for idx, handedness in enumerate(results_hands.multi_handedness):
-                        hand_side = get_hand_side(handedness, rear_camera)
-
-                        if hand_side == 'left':
-                            landmarks_left_hand = results_hands.multi_hand_landmarks[idx]
-                        elif hand_side == 'right':
-                            landmarks_right_hand = results_hands.multi_hand_landmarks[idx]
-
-                serialized_pose = serialize_landmarks(landmarks_pose)
-                serialized_left_hand = serialize_landmarks(landmarks_left_hand)
-                serialized_right_hand = serialize_landmarks(landmarks_right_hand)
-
-                # Write serialized landmarks to JSON
-                json_data.append({
-                    'frame_number': frame_number,
-                    'pose': serialized_pose,
-                    'left_hand': serialized_left_hand,
-                    'right_hand': serialized_right_hand
-                })
-
+            # Skip frames based on frame_interval
+            if frame_number % frame_interval != 0:
                 frame_number += 1
-                processed_frames += 1
+                continue
 
-                # Stop processing if frame_limit is reached
-                if frame_limit is not None and processed_frames >= frame_limit:
-                    break
+            # Convert the BGR image to RGB
+            image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        if json_output:
-            # Write JSON data to file
-            json.dump(json_data, json_file, indent=4)
-            print(f"✅ Landmarks saved to '{json_path}'")
+            # Process the image and extract landmarks
+            results_pose = pose.process(image_rgb)
+            results_hands = hands.process(image_rgb)
 
-        loop_complete = True
+            # Extract landmarks for pose, left hand, and right hand
+            landmarks_pose = results_pose.pose_landmarks
 
-    except KeyboardInterrupt:
-        print("Process interrupted by user.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
+            # Check if there are any pose landmarks detected
+            if landmarks_pose is None:
+                landmarks_pose = create_empty_landmark_list(N_LANDMARKS_POSE)
 
-        cap.release()  # Close video file
+            # Initialize empty hand landmarks, then overwrite if it finds it
+            landmarks_left_hand = create_empty_landmark_list(N_LANDMARKS_HAND)
+            landmarks_right_hand = create_empty_landmark_list(N_LANDMARKS_HAND)
 
-        if show_preview and cv2.getWindowProperty(cv2_window_name, 0) >= 0:
-            cv2.destroyWindow(cv2_window_name)  # close preview window
+            # Check if there are any hand landmarks detected
+            if results_hands.multi_hand_landmarks:
+                # Get handedness of each hand
+                for idx, handedness in enumerate(results_hands.multi_handedness):
+                    hand_side = get_hand_side(handedness, rear_camera)
 
-        if json_output and json_file is not None:
-            # Close file
-            json_file.close()
+                    if hand_side == 'left':
+                        landmarks_left_hand = results_hands.multi_hand_landmarks[idx]
+                    elif hand_side == 'right':
+                        landmarks_right_hand = results_hands.multi_hand_landmarks[idx]
 
-        if json_output and not loop_complete:
-            # Remove JSON file if loop was not completed
-            os.remove(json_path)
-            print(f"❌ Landmarks file '{json_path}' not written properly.")
+            serialized_pose = serialize_landmarks(landmarks_pose)
+            serialized_left_hand = serialize_landmarks(landmarks_left_hand)
+            serialized_right_hand = serialize_landmarks(landmarks_right_hand)
 
-        if save_annotated_video:
-            out.release()
-            print(f"✅ Annotated video saved to '{annotated_video_path}'")
+            # Write serialized landmarks to JSON
+            json_data.append({
+                'frame_number': frame_number,
+                'pose': serialized_pose,
+                'left_hand': serialized_left_hand,
+                'right_hand': serialized_right_hand
+            })
+
+            frame_number += 1
+            processed_frames += 1
+
+            # Stop processing if frame_limit is reached
+            if frame_limit is not None and processed_frames >= frame_limit:
+                break
+
+    cap.release()  # Close video file
 
     return json_data
 
@@ -345,3 +265,16 @@ def draw_landmarks_on_image(rgb_image, results_pose, results_hands, rear_camera)
                 solutions.drawing_styles.get_default_pose_landmarks_style())
 
     return annotated_image
+
+# # Streamlit test app
+# def app():
+#     st.title("Video to Landmarks JSON")
+
+#     video_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mkv"])
+
+#     if video_file:
+#         landmarks = process_video_to_landmarks_json(video_file)
+#         st.json(landmarks)
+
+# if __name__ == "__main__":
+#     app()
