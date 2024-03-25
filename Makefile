@@ -29,6 +29,7 @@ streamlit:
 # ----------------------------------
 install:
 	@pip install . -U
+	apt-get install ffmpeg
 
 clean:
 	@rm -fr */__pycache__
