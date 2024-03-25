@@ -1,6 +1,6 @@
 #numpy
 #queue
-# open-cv
+opencv-python
 streamlit
 #av
 requests
