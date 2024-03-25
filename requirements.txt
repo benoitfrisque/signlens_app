@@ -1,0 +1,11 @@
+#numpy
+#queue
+# open-cv
+streamlit
+#av
+requests
+#PIL
+#io
+mediapipe==0.10.9 # later versions are not supporting pose estimation?
+#streamlit_webrtc
+#json
