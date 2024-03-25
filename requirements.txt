@@ -6,6 +6,7 @@ streamlit
 requests
 #PIL
 #io
-mediapipe==0.10.9 # later versions are not supporting pose estimation?
+# mediapipe==0.10.9 # later versions are not supporting pose estimation?
+mediapipe
 #streamlit_webrtc
 #json
