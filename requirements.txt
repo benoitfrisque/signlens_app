@@ -1,7 +1,6 @@
-#numpy
-#queue
 #opencv-python
-opencv-python-headless
+#queue
+numpy opencv-python-headless
 streamlit
 #av
 requests
