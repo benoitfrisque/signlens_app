@@ -1,7 +1,7 @@
 #numpy
 #queue
 #opencv-python
-opencv-python-headless
+opencv-python-headless==4.5.1.48
 streamlit
 #av
 requests
