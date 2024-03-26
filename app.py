@@ -4,6 +4,7 @@ import requests
 import json
 import cv2
 from video_utils import process_video_to_landmarks_json
+from streamlit_extras.app_logo import add_logo
 
 NUM_CLASSES = 10
 
@@ -38,8 +39,9 @@ st.markdown("""
 # Sidebar content
 logo = "https://raw.githubusercontent.com/robmarkcole/Holistic-Video-Understanding/main/docs/images/logo.png"
 logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
-logo = "signlens-high-resolution-logo.png"
+#logo = "signlens-high-resolution-logo.png"
 st.sidebar.image("logo", width=200)
+#add_logo(logo)
 st.sidebar.title("About SignLens")
 st.sidebar.caption("An app for sign language translation using Mediapipe and an RNN model.")
 

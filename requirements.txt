@@ -8,7 +8,7 @@ requests
 #io
 # mediapipe==0.10.9 # later versions are not supporting pose estimation?
 mediapipe
-#streamlit_webrtc
 #json
 ## formatting
 streamlit-extras
+validators
