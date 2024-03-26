@@ -1,5 +1,5 @@
 #from io import BytesIO
-#import json
+import time
 import streamlit as st
 #import cv2
 import requests
@@ -25,18 +25,45 @@ video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv", "as
     "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
 
 if video:
-    landmarks = process_video_to_landmarks_json(video)
-    st.json(landmarks)
-    #json_data = process_video_to_landmarks_json(video) #, json_output=False,
-        #save_annotated_video=False, show_preview=False, frame_interval=1,
-        #frame_limit=None, rear_camera=True, output_dir=None)
-#response = requests.post("http://127.0.0.1:8000/api, json=json_data)
-#result = response.json()["result"]
-#st.success(f"Result: {result}")
+    state = "running"
 
-# Adjust color based on probability
-#color = f"rgb({int(api_results['probability'] * 255)}, 0, 0)"
-#st.markdown(f'<p style="color:{color}; font-size: 24px;">{api_results["word"]}</p>', unsafe_allow_html=True)
+    # Create a status container
+    status_text = st.empty()
+
+    try:
+        # Display the status
+        status_text.text("Extracting landmarks... 🐢")
+
+        # Call the process_video_to_landmarks_json function
+        json_landmarks = process_video_to_landmarks_json(video)
+
+        st.json(json_landmarks, expanded=False)
+
+        response = requests.post("http://127.0.0.1:8000/predict", json=json_landmarks, timeout=120)
+        #st.text(response)
+
+# {'Word:': word, 'Probability:': proba}
+        # Check the response code and handle accordingly
+        if response.ok:  # 200 <= response.status_code < 300
+            status_text.text("Video processing complete! 🎉")
+            result = response.json()
+            st.success(f"Result: {result}")
+            state = "complete"
+        else:
+            status_text.text(f"API Error: {response.status_code}")
+            st.error(f"API Error: {response.status_code}")
+            state = "error"
+
+    except Exception as e:
+        status_text.text(f"API Error: {e}")
+        st.error(f"API Error: {e}")
+        state = "error"
+
+    except Exception as e:
+        status_text.text(f"API Error: {e}")
+        st.error(f"API Error: {e}")
+        state = "error"
+
 
 
 
