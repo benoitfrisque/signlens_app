@@ -1,6 +1,7 @@
 numpy
 opencv-python-headless #==4.5.5.64
 streamlit
+streamlit-webrtc
 #av
 requests
 #PIL
@@ -9,3 +10,5 @@ requests
 mediapipe
 #streamlit_webrtc
 #json
+## formatting
+streamlit-extras
