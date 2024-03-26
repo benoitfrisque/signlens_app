@@ -33,17 +33,20 @@ if video:
     status_text = st.empty()
 
     try:
-        # Display the status
-        status_text.text("Extracting landmarks... 🐢")
+        with st.spinner("⏱️ ... 🐢"):
+            # Display the status
+            status_text.text("Extracting landmarks")
 
-        # Call the process_video_to_landmarks_json function
-        json_landmarks = process_video_to_landmarks_json(video)
+            # Call the process_video_to_landmarks_json function
+            json_landmarks = process_video_to_landmarks_json(video)
 
-        st.json(json_landmarks, expanded=False)
-
-        response = requests.post("http://127.0.0.1:8000/predict/data", json=json.dumps(json_landmarks), timeout=120)
-        #response = requests.post("https://signlens-pait7pkgma-oa.a.run.app/predict", json=json_landmarks, timeout=120)
-        #st.text(response)
+            st.json(json_landmarks, expanded=False)
+        with st.spinner("requesting API response..."):
+            headers = {'Content-Type': 'application/json'} # maybe not needed
+            response = requests.post("http://127.0.0.1:8000/predict",
+                                     headers=headers, json=json_landmarks, timeout=120) #json.dumps(json_landmarks)
+            #response = requests.post("https://signlens-pait7pkgma-oa.a.run.app/predict", json=json_landmarks, timeout=120)
+            #st.text(response)
 
 # {'Word:': word, 'Probability:': proba}
         # Check the response code and handle accordingly
