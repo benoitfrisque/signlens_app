@@ -37,11 +37,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar content
-logo = "https://raw.githubusercontent.com/robmarkcole/Holistic-Video-Understanding/main/docs/images/logo.png"
-logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
+logo = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
+#logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
 #logo = "signlens-high-resolution-logo.png"
-st.sidebar.image("logo", width=200)
-#add_logo(logo)
+#st.sidebar.image(logo, width=200)
+add_logo(logo_url=logo)
 st.sidebar.title("About SignLens")
 st.sidebar.caption("An app for sign language translation using Mediapipe and an RNN model.")
 
