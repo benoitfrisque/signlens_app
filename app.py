@@ -6,6 +6,8 @@ import requests
 #from PIL import Image
 #import mediapipe as mp
 #import av
+import json
+from streamlit_extras.streaming_write import write
 #from utils import *
 #from utils import process_video_to_landmarks_json
 from video_utils  import process_video_to_landmarks_json
@@ -39,7 +41,8 @@ if video:
 
         st.json(json_landmarks, expanded=False)
 
-        response = requests.post("http://127.0.0.1:8000/predict", json=json_landmarks, timeout=120)
+        response = requests.post("http://127.0.0.1:8000/predict/data", json=json.dumps(json_landmarks), timeout=120)
+        #response = requests.post("https://signlens-pait7pkgma-oa.a.run.app/predict", json=json_landmarks, timeout=120)
         #st.text(response)
 
 # {'Word:': word, 'Probability:': proba}
@@ -48,7 +51,10 @@ if video:
             status_text.text("Video processing complete! 🎉")
             result = response.json()
             st.success(f"Result: {result}")
+            st.write(f"Word: {result['Word:']}")
+            st.write(f"Probability: {result['Probability:']}")
             state = "complete"
+            st.balloons()
         else:
             status_text.text(f"API Error: {response.status_code}")
             st.error(f"API Error: {response.status_code}")
