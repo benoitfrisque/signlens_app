@@ -25,8 +25,9 @@ video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv", "as
     "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
 
 if video:
-    landmarks = process_video_to_landmarks_json(video)
-    st.json(landmarks)
+    with st.spinner("extracting landmarks... 🐢"):
+        landmarks = process_video_to_landmarks_json(video)
+        st.json(landmarks)
     #json_data = process_video_to_landmarks_json(video) #, json_output=False,
         #save_annotated_video=False, show_preview=False, frame_interval=1,
         #frame_limit=None, rear_camera=True, output_dir=None)
