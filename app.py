@@ -127,9 +127,10 @@ with col2:
                 if response.ok:  # 200 <= response.status_code < 300
                     status_text.text(f"Video processing complete! 🎉 (Elapsed time: {elapsed_time:.2f} seconds)")
                     result = response.json()
+                    #result
                     sign = result['sign']
                     proba = result['probability']
-                    proba = float(list(proba)[0])
+                    proba = round(100*(proba),2)
                     #st.write(result['sign'])
                     #st.success(f"Our model predicts the following sign: {result['sign']} with a probability of {100*(result['probability']):.2f}%")
                     #st.write(f"sign: {result['sign:']}")
@@ -140,14 +141,14 @@ with col2:
 
                     search_term = result['sign']
                     # Pixabay API
-                    api_key = str(st.secrets.api_key)
-                    search_term_str = '+'.join(str(x) for x in search_term)
-                    api_key
-                    url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term_str)
-                    response = requests.get(url, timeout=60)
-                    image_data = response.json()
-                    #image_data
-                    img_url = image_data["hits"][0]["webformatURL"]
+                    # api_key = str(st.secrets.api_key)
+                    # search_term_str = '+'.join(str(x) for x in search_term)
+                    # api_key
+                    # url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term_str)
+                    # response = requests.get(url, timeout=60)
+                    # image_data = response.json()
+                    # #image_data
+                    # img_url = image_data["hits"][0]["webformatURL"]
 
                     # Lookup an image of the result['sign'] using Unsplash API
                     #unsplash_access_key = "YOUR_UNSPLASH_ACCESS_KEY"
@@ -176,19 +177,20 @@ with col2:
                     #"Translation guess:"
                     #st.header(f"{result['sign']}")
 
-                    probability_color = "green" if 70*(proba) > 100 else "yellow" if 50*(proba) < 100 else "red"
-                    probc = ":%s[%s]" % (probability_color, f"{100*(proba):.2f}%")
-                    #st.metric("probability",f"{100*(proba):.2f}%", probability_color)
+                    # probability_color = "green" if 70*(proba) > 100 else "yellow" if 50*(proba) < 100 else "red"
+                    # probc = ":%s[%s]" % (probability_color, f"{100*(proba):.2f}%")
+                    # #st.metric("probability",f"{100*(proba):.2f}%", probability_color)
                     st.metric("Translation guess", f"{result['sign']}")
-                    probability_color
-                    st.subheader("Probability", f":green[{proba}]")
-                    if probability_color == "green":
-                        st.subheader("Probability", f":green[{100*({proba}):.2f}%]")
-                    elif probability_color == "yellow":
-                        st.subheader("Probability", f":yellow[{100*({proba}):.2f}%]")
-                    else:
-                        st.subheader("Probability", f":red[{100*({proba}):.2f}%]")
-                    st.image(img_url)
+                    # probability_color
+                    "probability:"
+                    st.metric(f"{proba}")
+                    # if probability_color == "green":
+                    #     st.subheader("Probability", f":green[{100*({proba}):.2f}%]")
+                    # elif probability_color == "yellow":
+                    #     st.subheader("Probability", f":yellow[{100*({proba}):.2f}%]")
+                    # else:
+                    #     st.subheader("Probability", f":red[{100*({proba}):.2f}%]")
+                    # st.image(img_url)
                         #st.image(gif_url)
 
                 else:
