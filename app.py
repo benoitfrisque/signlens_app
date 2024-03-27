@@ -1,38 +1,75 @@
-#from io import BytesIO
 import time
 import streamlit as st
-#import cv2
 import requests
-#from PIL import Image
-#import mediapipe as mp
-#import av
 import json
-from streamlit_extras.streaming_write import write
-#from utils import *
-#from utils import process_video_to_landmarks_json
-from video_utils  import process_video_to_landmarks_json
-NUM_CLASSES=10
-st.set_page_config(page_title="SignLens Demo",
-                                    page_icon="🎭", layout="centered",
-                                    #initial_sidebar_state="expanded"
-                                    )
-#video_json = video_utils.process_video_to_landmarks_json()
-st.title("SignLens please!...")
-st.subheader("Sign Language translation")
-st.caption("using Mediapipe for Landmark extraction  and an RNN model for translation")
+import cv2
+from video_utils import process_video_to_landmarks_json
+from streamlit_extras.app_logo import add_logo
 
-# Open video file if uploaded
-video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv", "asf",
-    #"m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
-    "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
+NUM_CLASSES = 10
+
+st.set_page_config(page_title="SignLens Demo",
+                   page_icon="🎭", layout="wide",
+                   initial_sidebar_state="expanded")
+
+# Add custom CSS
+st.markdown("""
+<style>
+.reportview-container .main .block-container {
+    padding-top: 1rem;
+    padding-right: 2.5rem;
+    padding-left: 2.5rem;
+    padding-bottom: 1rem;
+}
+
+.sidebar .sidebar-content {
+    padding-top: 1rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+}
+
+.stButton > button:hover {
+    background-color: #4caf50;
+    color: white;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Sidebar content
+logo = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
+#logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
+#logo = "signlens-high-resolution-logo.png"
+#st.sidebar.image(logo, width=200)
+add_logo(logo_url=logo)
+st.sidebar.title("About SignLens")
+st.sidebar.caption("An app for sign language translation using Mediapipe and an RNN model.")
+
+# Main content
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.title("SignLens Demo")
+    st.subheader("Sign Language translation")
+
+with col2:
+    # Open video file if uploaded
+    video = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv",
+                                                         "m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
+                                                         "asf", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
 
 if video:
+    # Display video preview
+    st.video(video)
+
     state = "running"
 
     # Create a status container
     status_text = st.empty()
 
     try:
+        start_time = time.time()
+
         with st.spinner("⏱️ ... 🐢"):
             # Display the status
             status_text.text("Extracting landmarks")
@@ -41,17 +78,18 @@ if video:
             json_landmarks = process_video_to_landmarks_json(video)
 
             st.json(json_landmarks, expanded=False)
-        with st.spinner("requesting API response..."):
-            headers = {'Content-Type': 'application/json'} # maybe not needed
-            response = requests.post("http://127.0.0.1:8000/predict",
-                                     headers=headers, json=json_landmarks, timeout=120) #json.dumps(json_landmarks)
-            #response = requests.post("https://signlens-pait7pkgma-oa.a.run.app/predict", json=json_landmarks, timeout=120)
-            #st.text(response)
 
-# {'Word:': word, 'Probability:': proba}
+        with st.spinner("Requesting API response..."):
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(#"http://127.0.0.1:8000/predict",
+                                     'https://signlens-pait7pkgma-oa.a.run.app/predict',
+                                     headers=headers, json=json_landmarks, timeout=120)
+
+        elapsed_time = time.time() - start_time
+
         # Check the response code and handle accordingly
         if response.ok:  # 200 <= response.status_code < 300
-            status_text.text("Video processing complete! 🎉")
+            status_text.text(f"Video processing complete! 🎉 (Elapsed time: {elapsed_time:.2f} seconds)")
             result = response.json()
             st.success(f"Result: {result}")
             st.write(f"Word: {result['Word:']}")
@@ -62,11 +100,6 @@ if video:
             status_text.text(f"API Error: {response.status_code}")
             st.error(f"API Error: {response.status_code}")
             state = "error"
-
-    except Exception as e:
-        status_text.text(f"API Error: {e}")
-        st.error(f"API Error: {e}")
-        state = "error"
 
     except Exception as e:
         status_text.text(f"API Error: {e}")
