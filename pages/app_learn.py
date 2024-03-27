@@ -3,6 +3,17 @@ import pandas as pd
 import numpy as np
 import os
 
+st.set_page_config(
+        page_title="SignLens - Learn",
+        # page_icon="🧊", # to be modified
+        layout="wide",
+        initial_sidebar_state="collapsed",
+        menu_items={
+            'Report a bug': "https://github.com/benoitfrisque/signlens",
+            'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
+            }
+)
+
 # Load CSV data
 @st.cache_data
 def load_learn_video_url_list():
@@ -38,12 +49,15 @@ def display_gallery_one_video_per_sign(signs, page_num, items_per_page=9, num_co
                     st.markdown(f"#### {sign.capitalize()}")
                     st.video(video_url)
 
-
 # # Streamlit UI
 st.title("ASL Learning Center")
 
+# Session state
+if 'page_num' not in st.session_state:
+    st.session_state.page_num = 1
+
 # Search bar
-search_query = st.text_input("Search for a sign").strip()
+search_query = st.text_input("Search for a sign").lower().strip()
 
 items_per_page = 9
 
@@ -52,27 +66,23 @@ if search_query == "":
     filtered_signs = unique_signs
 
 else:
-    max_items_per_sign = None
     # Filter signs based on search query
-    filtered_signs = [sign for sign in unique_signs if search_query.lower() in sign.lower()]
+    filtered_signs = [sign for sign in unique_signs if search_query in sign.lower()]
 
     if not filtered_signs:
         st.warning("No signs found matching the search query.")
+    else:
+        max_items_per_sign = 3
+        st.session_state.page_num = 1
 
-# Session state
-if 'page_num' not in st.session_state:
-    st.session_state.page_num = 1
 
 # Display gallery for all signs
 display_gallery_one_video_per_sign(filtered_signs, st.session_state.page_num)
 
-# Page number button centered at the bottom
-col1, col2, col3 = st.columns([1, 2, 1])
 
+# Javascript to scroll up
 js_scroll_up = '''
 <script>
-    // Check if dark mode is enabled
-    var isDarkMode = window.parent.document.querySelector('.stThemeDark') !== null;
 
     // Get the body element
     var body = window.parent.document.querySelector(".main");
@@ -80,23 +90,32 @@ js_scroll_up = '''
     // Set the scroll top to 0
     body.scrollTop = 0;
 
-    // If dark mode is enabled, adjust background color and text color
-    if (isDarkMode) {
-        body.style.backgroundColor = '#333'; // Adjust this color according to your dark theme
-        body.style.color = '#fff'; // Adjust this color according to your dark theme
+    body.style.backgroundColor = '#4931c'; // Adjust this color according to your dark theme
     }
 </script>
 '''
 
+# Page number button centered at the bottom
+page_buttons_col = st.columns([1, 1, 2, 1, 1])
 
+# Define your function to be called when the "Previous Page" button is clicked
+def on_previous_page_click():
+    st.session_state.page_num -= 1
+    st.components.v1.html(js_scroll_up)
+
+
+# Define your function to be called when the "Next Page" button is clicked
+def on_next_page_click():
+    st.session_state.page_num += 1
+    st.components.v1.html(js_scroll_up)
+
+# Check if there's a previous page available and show the "Previous Page" button
 if st.session_state.page_num > 1:
-    with col1:
-        if st.button("Previous Page", key="prev_button"):
-            st.session_state.page_num -= 1
-            st.components.v1.html(js_scroll_up)
+    with page_buttons_col[1]:
+        st.button("Previous Page", on_click=on_previous_page_click, key="prev_button")
 
+
+# Check if there's a next page available and show the "Next Page" button
 if len(filtered_signs) > st.session_state.page_num * items_per_page:
-    with col3:
-        if st.button("Next Page", key="next_button"):
-            st.session_state.page_num += 1
-            st.components.v1.html(js_scroll_up)
+    with page_buttons_col[3]:
+        st.button("Next Page", on_click=on_next_page_click, key="next_button")
