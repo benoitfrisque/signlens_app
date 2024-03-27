@@ -4,10 +4,10 @@ import numpy as np
 import os
 
 st.set_page_config(
-        page_title="SignLens - Learn",
-        # page_icon="🧊", # to be modified
+        page_title="SignLens Learn",
+        page_icon="resources/signlens-favicon-black.png",
         layout="wide",
-        initial_sidebar_state="collapsed",
+        initial_sidebar_state="expanded",
         menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
             'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
