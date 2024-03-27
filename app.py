@@ -30,7 +30,7 @@ st.markdown("""
 }
 
 h1 {
-    color: #8968CD;
+    color: #adffb7;
 }
 </style>
 """, unsafe_allow_html=True)
