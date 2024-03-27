@@ -31,7 +31,7 @@ data = load_learn_video_url_list()
 # Filter unique signs
 unique_signs = np.sort(data['sign'].unique())
 
-# # Function to display video gallery for a sign
+# Function to display video gallery for all signs (one video per sign)
 def display_gallery_one_video_per_sign(signs, page_num, items_per_page=9, num_cols=3):
 
     num_rows = items_per_page // num_cols
@@ -49,6 +49,25 @@ def display_gallery_one_video_per_sign(signs, page_num, items_per_page=9, num_co
                     st.markdown(f"#### {sign.capitalize()}")
                     st.video(video_url)
 
+# Function to display video gallery for queried signs (somevideos per sign)
+def display_gallery_query(query_signs, page_num, items_per_page=9, num_cols=3):
+
+    num_rows = items_per_page // num_cols
+    start_index = (page_num - 1) * items_per_page
+    end_index = min(start_index + items_per_page, len(filtered_signs))
+
+    query_signs_page = query_signs[start_index:end_index]
+    # for i in range(start_index, end_index):
+    for i in range(min(num_rows, len(query_signs_page))):
+        sign = query_signs_page[i]
+        st.title(f"{sign.capitalize()}")
+        cols = st.columns(num_cols)  # Create a new column at each line to make sure they are aligned vertically
+
+        for j in range(num_cols):
+            video_url = data[data['sign'] == sign]['url'].tolist()[j]
+            with cols[j]:
+                    st.video(video_url)
+
 # # Streamlit UI
 st.title("ASL Learning Center")
 
@@ -64,6 +83,8 @@ items_per_page = 9
 if search_query == "":
     max_items_per_sign = 1
     filtered_signs = unique_signs
+    display_gallery_one_video_per_sign(unique_signs,  st.session_state.page_num)
+
 
 else:
     # Filter signs based on search query
@@ -74,10 +95,7 @@ else:
     else:
         max_items_per_sign = 3
         st.session_state.page_num = 1
-
-
-# Display gallery for all signs
-display_gallery_one_video_per_sign(filtered_signs, st.session_state.page_num)
+        display_gallery_query(filtered_signs, st.session_state.page_num)
 
 
 # Javascript to scroll up
