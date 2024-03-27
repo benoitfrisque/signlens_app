@@ -14,6 +14,7 @@ st.set_page_config(
             }
 )
 
+
 # Load CSV data
 @st.cache_data
 def load_learn_video_url_list():
@@ -52,23 +53,22 @@ def display_gallery_one_video_per_sign(signs, page_num, items_per_page=9, num_co
 # Function to display video gallery for queried signs (somevideos per sign)
 def display_gallery_query(query_signs, page_num, items_per_page=9, num_cols=3):
 
-    num_rows = items_per_page // num_cols
     start_index = (page_num - 1) * items_per_page
-    end_index = min(start_index + items_per_page, len(filtered_signs))
+    end_index = min(start_index + items_per_page, len(query_signs))
 
     query_signs_page = query_signs[start_index:end_index]
-    # for i in range(start_index, end_index):
-    for i in range(min(num_rows, len(query_signs_page))):
-        sign = query_signs_page[i]
+
+    for i, sign in enumerate(query_signs_page):
         st.title(f"{sign.capitalize()}")
         cols = st.columns(num_cols)  # Create a new column at each line to make sure they are aligned vertically
 
         for j in range(num_cols):
-            video_url = data[data['sign'] == sign]['url'].tolist()[j]
-            with cols[j]:
-                    st.video(video_url)
+            video_urls = data[data['sign'] == sign]['url'].tolist()
+            if j < len(video_urls):
+                with cols[j]:
+                    st.video(video_urls[j])
 
-# # Streamlit UI
+# Streamlit UI
 st.title("ASL Learning Center")
 
 # Session state
@@ -98,20 +98,20 @@ else:
         display_gallery_query(filtered_signs, st.session_state.page_num)
 
 
-# Javascript to scroll up
-js_scroll_up = '''
-<script>
+# # Javascript to scroll up
+# js_scroll_up = '''
+# <script>
 
-    // Get the body element
-    var body = window.parent.document.querySelector(".main");
+#     // Get the body element
+#     var body = window.parent.document.querySelector(".main");
 
-    // Set the scroll top to 0
-    body.scrollTop = 0;
+#     // Set the scroll top to 0
+#     body.scrollTop = 0;
 
-    body.style.backgroundColor = '#4931c'; // Adjust this color according to your dark theme
-    }
-</script>
-'''
+#     body.style.backgroundColor = '#4931c'; // Adjust this color according to your dark theme
+#     }
+# </script>
+# '''
 
 # Page number button centered at the bottom
 page_buttons_col = st.columns([1, 1, 2, 1, 1])
@@ -119,19 +119,17 @@ page_buttons_col = st.columns([1, 1, 2, 1, 1])
 # Define your function to be called when the "Previous Page" button is clicked
 def on_previous_page_click():
     st.session_state.page_num -= 1
-    st.components.v1.html(js_scroll_up)
-
+    # st.components.v1.html(js_scroll_up)
 
 # Define your function to be called when the "Next Page" button is clicked
 def on_next_page_click():
     st.session_state.page_num += 1
-    st.components.v1.html(js_scroll_up)
+    # st.components.v1.html(js_scroll_up)
 
 # Check if there's a previous page available and show the "Previous Page" button
 if st.session_state.page_num > 1:
     with page_buttons_col[1]:
         st.button("Previous Page", on_click=on_previous_page_click, key="prev_button")
-
 
 # Check if there's a next page available and show the "Next Page" button
 if len(filtered_signs) > st.session_state.page_num * items_per_page:
