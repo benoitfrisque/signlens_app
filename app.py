@@ -286,7 +286,14 @@ with col2:
                 st.error(f"API Error: {e}")
                 state = "error"
 
-if
+
+            # if 'b2_disabled' not in st.session_state:
+            #     st.session_state.b2_disabled = True
+            # if video_stream and st.session_state.b2_disabled and video_stream != st.session_state.last_video_stream:
+            #     st.session_state.b2_disabled = True
+            # st.session_state.last_video_stream = video_stream
+
+
 
 #cap = cv2.VideoCapture(video_stream)
 
