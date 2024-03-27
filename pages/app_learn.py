@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
-import requests
 
 # Load CSV data
 @st.cache_data
@@ -28,6 +27,7 @@ def display_gallery_one_video_per_sign(signs, page_num, items_per_page=9, num_co
     start_index = (page_num - 1) * items_per_page
     end_index = min(start_index + items_per_page, len(filtered_signs))
 
+    signs = signs[start_index:end_index]
     # for i in range(start_index, end_index):
     for i in range(num_rows): # rows
         cols = st.columns(num_cols)  # Create a new column at each line to make sure they are aligned vertically
@@ -63,21 +63,40 @@ else:
 if 'page_num' not in st.session_state:
     st.session_state.page_num = 1
 
-
-
 # Display gallery for all signs
 display_gallery_one_video_per_sign(filtered_signs, st.session_state.page_num)
 
+# Page number button centered at the bottom
+col1, col2, col3 = st.columns([1, 2, 1])
 
-# # Page number button centered at the bottom
-# col1, col2, col3 = st.columns([1, 2, 1])
+js_scroll_up = '''
+<script>
+    // Check if dark mode is enabled
+    var isDarkMode = window.parent.document.querySelector('.stThemeDark') !== null;
 
-# if st.session_state.page_num > 1:
-#     with col1:
-#         if st.button("Previous Page", key="prev_button"):
-#             st.session_state.page_num -= 1
+    // Get the body element
+    var body = window.parent.document.querySelector(".main");
 
-# if len(filtered_signs) > st.session_state.page_num * items_per_page:
-#     with col3:
-#         if st.button("Next Page", key="next_button"):
-#             st.session_state.page_num += 1
+    // Set the scroll top to 0
+    body.scrollTop = 0;
+
+    // If dark mode is enabled, adjust background color and text color
+    if (isDarkMode) {
+        body.style.backgroundColor = '#333'; // Adjust this color according to your dark theme
+        body.style.color = '#fff'; // Adjust this color according to your dark theme
+    }
+</script>
+'''
+
+
+if st.session_state.page_num > 1:
+    with col1:
+        if st.button("Previous Page", key="prev_button"):
+            st.session_state.page_num -= 1
+            st.components.v1.html(js_scroll_up)
+
+if len(filtered_signs) > st.session_state.page_num * items_per_page:
+    with col3:
+        if st.button("Next Page", key="next_button"):
+            st.session_state.page_num += 1
+            st.components.v1.html(js_scroll_up)
