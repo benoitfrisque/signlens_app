@@ -113,6 +113,8 @@ background-size: cover;
 # Initialize the key in session state
 if 'clicked' not in st.session_state:
     st.session_state.clicked = {1:False,2:False}
+if 'new_video' not in st.session_state:
+    st.session_state.new_video = False
 
 # Function to update the value in session state
 def clicked(button):
@@ -154,6 +156,8 @@ with col1:
                                                          "asf", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
         st.session_state.b2_disabled = True
         #st.session_state.clicked[2] = False
+        st.session_state.new_video = True
+
     if video:
         st.session_state.b2_disabled = False
         holder.video(video, start_time=0)
@@ -169,6 +173,7 @@ with col1:
 
 with col2:
     front_on = st.toggle('Front camera (not mirrored)', True, key="front_on")
+    pixabay = st.checkbox("Show pixabay image of the sign", key="pixabay", value=False)
     #if front_on:
     #    st.write('(not mirrored)')
     st.subheader("Sign translation")
@@ -181,6 +186,8 @@ with col2:
               type="primary", disabled=st.session_state.b2_disabled)
     if video: #st.session_state.clicked[1]:
         if st.session_state.clicked[2]:
+            st.session_state.new_video = False
+            st.session_state.clicked[2] = False  # Reset the clicked state of the second button
             state = "running"
 
             # Create a status container
@@ -245,12 +252,14 @@ with col2:
 
                     search_term = result['sign']
                     # Pixabay API
-                    api_key = str(st.secrets.api_key)
-                    url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
-                    response = requests.get(url, timeout=60)
-                    image_data = response.json()
-                    #image_data
-                    img_url = image_data["hits"][0]["webformatURL"]
+                    if pixabay:
+                        api_key = str(st.secrets.api_key)
+                        url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
+                        response = requests.get(url, timeout=60)
+                        image_data = response.json()
+                        #image_data
+                        img_url = image_data["hits"][0]["webformatURL"]
+                        st.image(img_url)
 
                     # Lookup an image of the result['sign'] using Unsplash API
                     #unsplash_access_key = "YOUR_UNSPLASH_ACCESS_KEY"
@@ -274,7 +283,6 @@ with col2:
 #                     response = requests.get(url)
 #                     image_data = response.json()
 #                     img_url = image_data["items"][0]["link"]
-                    st.image(img_url)
                         #st.image(gif_url)
 
                 else:
