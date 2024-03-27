@@ -1,7 +1,7 @@
 [theme]
-primaryColor="#adffb7"
-backgroundColor="#4931c3"
-secondaryBackgroundColor="#021f64"
+primaryColor="#A980D6"
+backgroundColor="#332478"
+secondaryBackgroundColor="#594E92"
 textColor="#f1f1f1"
 font="sans serif"
 
@@ -14,3 +14,21 @@ font="sans serif"
 # purple2: #8455cf
 # purple3: #4931c3
 # purple4: #5434f3
+
+
+#3736B5
+#243493
+#594E92
+#A980D6
+#332478
+#C9AFDF
+
+
+# Colors before modification:
+  # primaryColor="#adffb7"
+  # backgroundColor="#4931c3"
+  # secondaryBackgroundColor="#021f64"
+  # textColor="#f1f1f1"
+  # font="sans serif"
+
+# green from title: #adffb7
