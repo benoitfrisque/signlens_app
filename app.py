@@ -7,11 +7,17 @@ from video_utils import process_video_to_landmarks_json
 from streamlit_extras.app_logo import add_logo
 
 import base64
+from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
+
 
 
 st.set_page_config(page_title="SignLens Demo",
-                   page_icon="⚙︎", layout="wide",
-                   initial_sidebar_state="expanded")
+                   page_icon="🧊", layout="wide",
+                   initial_sidebar_state="collapsed",
+                   menu_items={
+            'Report a bug': "https://github.com/benoitfrisque/signlens",
+            'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
+            })
 
 
 # @st.cache_resource(allow_output_mutation=True)
@@ -36,7 +42,7 @@ st.set_page_config(page_title="SignLens Demo",
 
 # set_png_as_page_bg('resources/background_signlens.png')
 
-NUM_CLASSES = 10
+NUM_CLASSES = 250
 
 # def set_background(png_file):
 #     bin_str = get_base64(png_file)
@@ -121,7 +127,8 @@ st.sidebar.image(logo,use_column_width=True)
 #add_logo(logo_url=logo,height=10)
 st.sidebar.title("About SignLens")
 st.sidebar.caption("An app for translating sign language, but also aid in learning it.")
-st.sidebar.info("This is a demo app using computer vision and deep learning. Upload a video of sign language gestures and click the button to translate the signs to text. The app uses the Mediapipe library to extract landmarks from the video frames and sends the landmarks to a FastAPI server running a pre-trained RNN model to predict the sign language word.")
+st.sidebar.info("This is a demo app using computer vision and deep learning. Upload a video of sign language gestures and click the button to translate the signs to text!")
+                #The app uses the Mediapipe library to extract landmarks from the video frames and sends the landmarks to a FastAPI server running a pre-trained RNN model to predict the sign language word.")
 #placeholder = st.empty()
 
 st.title("SignLens Demo")
@@ -138,24 +145,38 @@ with col1:
     #if st.button("Upload a video", on_click=clicked, args=[1], key="upload_video",type="primary"):
     with st.spinner("Uploading video..."):
         #time.sleep(1.5)
+
         video = st.file_uploader("Select video file", label_visibility="collapsed", key="upload_video", help="Upload a video file",
                                  #disabled=~st.session_state.b2_disabled,
                                  type=["mp4", "mov", "avi", "mkv",
                                                          #"m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
                                                          "asf", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
+        st.session_state.b2_disabled = True
+        #st.session_state.clicked[2] = False
     if video:
         st.session_state.b2_disabled = False
-        holder.video(video)
+        holder.video(video, start_time=0)
         title1.write(":green[Video uploaded successfully!] :tada:")
+        muted = st.checkbox("Mute")
+
+        # webrtc_streamer(
+        #     key="mute_sample",
+        #     video_html_attrs=VideoHTMLAttributes(
+        #         autoPlay=True, controls=True, style={"width": "100%"}, muted=muted
+        #     ),
+        # )
 
 with col2:
+    front_on = st.toggle('Front camera (not mirrored)', True, key="front_on")
+    #if front_on:
+    #    st.write('(not mirrored)')
     st.subheader("Sign translation")
     #expander = st.expander("Optional controls")
     #expander.radio("Options", ["Translate", "Learn", "Live"])
     #if st.button("Push to translate"):
     # Add a button to start the prediction
     # Conditional based on value in session state, not the output
-    st.button("Start Translation", on_click=clicked, args=[2],
+    button_trans = st.button("Start Translation", on_click=clicked, args=[2],
               type="primary", disabled=st.session_state.b2_disabled)
     if video: #st.session_state.clicked[1]:
         if st.session_state.clicked[2]:
@@ -172,7 +193,7 @@ with col2:
                     #status_text.status("Extracting landmarks")
 
                     # Call the process_video_to_landmarks_json function
-                    json_landmarks = process_video_to_landmarks_json(video)
+                    json_landmarks = process_video_to_landmarks_json(video, rear_camera=not front_on)
 
                     # st.json(json_landmarks, expanded=False) # just for debugging
 
@@ -188,7 +209,7 @@ with col2:
 
                 # Check the response code and handle accordingly
                 if response.ok:  # 200 <= response.status_code < 300
-                    status_text.text(f"Video processing complete! 🎉     (Elapsed time: {elapsed_time:.2f} seconds)")
+                    status_text.text(f"Video processing complete! 🎉  \n   (Elapsed time: {elapsed_time:.2f} seconds)")
                     result = response.json()
                     #result
                     sign = result['sign']
@@ -239,7 +260,6 @@ with col2:
 
                     # Lookup a GIF of the result['sign'] using Tenor API
                     # ckey = "signlens_app"
-                    # tenor_access_key = "AIzaSyAJPjaf0y_8RtvPm-xJ5xsitGDDy-oAfmc"
                     # url = "https://tenor.googleapis.com/v2/search?q=%s&key=%s&client_key=%s&limit=%s" % (search_term, tenor_access_key, ckey,  1)
 
                     # response = requests.get(url, timeout=60)
@@ -266,7 +286,7 @@ with col2:
                 st.error(f"API Error: {e}")
                 state = "error"
 
-
+if
 
 #cap = cv2.VideoCapture(video_stream)
 
