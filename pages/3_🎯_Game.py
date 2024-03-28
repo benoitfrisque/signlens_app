@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import time
 import random
+from streamlit_extras.let_it_rain import rain
 
 st.set_page_config(
     page_title="SignLens Play",
@@ -179,6 +180,17 @@ def submit_answer(option,position=None):
             The correct option was: \t <span style='color:green; font-size:x-large'>{st.session_state.correct_option.capitalize()}</span></center>",
             unsafe_allow_html=True)
         #position.write(f"#, unsafe_allow_html=True)
+        #st.snow()
+        # import time
+        # start_time = time.time()
+        # if time.time() - start_time < 3:
+        #     time.sleep(0.1)
+        #     rain(
+        #     emoji="👎        💩",
+        #     font_size=44,
+        #     falling_speed=3,
+        #     animation_length=1
+        #     )
 
     st.session_state.answer_submitted = True
 
@@ -186,12 +198,12 @@ def submit_answer(option,position=None):
 
 # Function to display the game options
 def display_game():
-    st.subheader("Watch the Sign")
-
     #container.video(data=VIDEO_DATA)
-    _, col2, _ = st.columns([0.25, 0.5, 0.25])
+    st.subheader("Watch the Sign")
+    col1, col2, _ = st.columns([0.25, 0.7, 0.3])
     #with col2:
         #st.video(st.session_state.url)
+    #col1.subheader("Watch the Sign")
     col2.video(st.session_state.url)
 
     st.subheader("Which Sign Is It?")
