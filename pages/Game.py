@@ -95,16 +95,15 @@ if "random_index"  not in st.session_state:
     random.shuffle(final_options)
     st.session_state.options = final_options
 
-    print('im initializing')
-
-
 def submit_answer(option):
 
     if option == st.session_state.correct_option:
         st.write("<span style='color:green'>Correct!</span>", unsafe_allow_html=True)
+        st.balloons()
     else:
-        st.write(f"The correct option was: <span style='color:green'>{st.session_state.correct_option.capitalize()}</span>", unsafe_allow_html=True)
         st.write(f"You selected: <span style='color:red'>{option.capitalize()}</span>", unsafe_allow_html=True)
+        st.write(f"The correct option was: <span style='color:green'>{st.session_state.correct_option.capitalize()}</span>", unsafe_allow_html=True)
+
 
     st.session_state.answer_submitted = True
 
@@ -113,7 +112,7 @@ def submit_answer(option):
 # Function to display the game options
 def display_game():
     st.subheader("Watch the Sign")
-    col1, col2, col3 = st.columns([0.4, 0.8, 0.4])
+    col1, col2, col3 = st.columns([0.25, 0.8, 0.2])
     with col2:
         st.video(st.session_state.url)
 
@@ -131,13 +130,9 @@ def display_game():
 if 'answer_submitted' not in st.session_state:
     st.session_state.answer_submitted = False
 
-
-print(st.session_state.answer_submitted)
-
 # Check if an option has been selected
 if st.session_state.answer_submitted:
-    time.sleep(2)
-    print('im inside the if statement')
+    time.sleep(1)
     # If an option has been selected, display the correct option and reset state
     st.session_state.answer_submitted = False
     st.session_state.correct_option = None
@@ -146,4 +141,3 @@ if st.session_state.answer_submitted:
 
 else:
     display_game()
-    print('im at the bottom')
