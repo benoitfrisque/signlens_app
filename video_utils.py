@@ -47,7 +47,8 @@ def serialize_landmarks(landmark_list):
     return landmarks
 
 
-def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=None, rear_camera=True):
+def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=None, rear_camera=True,
+                                    min_detection_confidence=0.5, min_tracking_confidence=0.5):
     """
     Process a video file and extract landmarks from each frame.
 
@@ -79,8 +80,12 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    with mp_pose.Pose(static_image_mode=False) as pose, \
-            mp_hands.Hands(static_image_mode=False, max_num_hands=2) as hands:
+    with mp_pose.Pose(static_image_mode=False,
+                min_detection_confidence=min_detection_confidence,
+                min_tracking_confidence=min_tracking_confidence) as pose, \
+            mp_hands.Hands(static_image_mode=False, max_num_hands=2,
+                min_detection_confidence=min_detection_confidence,
+                min_tracking_confidence=min_tracking_confidence) as hands:
         while cap.isOpened():
             success, frame = cap.read()
             if not success:
