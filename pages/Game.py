@@ -113,7 +113,9 @@ def submit_answer(option):
 # Function to display the game options
 def display_game():
     st.subheader("Watch the Sign")
-    st.video(st.session_state.url)
+    col1, col2, col3 = st.columns([0.4, 0.8, 0.4])
+    with col2:
+        st.video(st.session_state.url)
 
     st.subheader("Which Sign Is It?")
 
