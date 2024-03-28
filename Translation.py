@@ -165,6 +165,8 @@ with col2:
     with st.expander("Advanced settings", expanded=False):
         min_detection_confidence = st.slider('Minimum detection confidence:', 0.1, 1.0, 0.5, 0.1)
         min_tracking_confidence = st.slider('Minimum tracking confidence:', 0.1, 1.0, 0.5, 0.1)
+        frame_interval = st.slider('Frame interval:', 1, 10, 1, 1)
+        #frame_limit = st.number_input('Frame limit:', 0, 200, 0, 1)  #slider('Frame limit:', 0, 200, 0, 1)
     front_on = st.toggle('Front camera (mirrored)', False, key="front_on")
     pixabay = st.checkbox("Show pixabay image of the sign", key="pixabay", value=True)
     #if front_on:
@@ -195,6 +197,7 @@ with col2:
 
                     # Call the process_video_to_landmarks_json function
                     json_landmarks = process_video_to_landmarks_json(video, rear_camera=not front_on,
+                                        frame_interval=frame_interval, #frame_limit=frame_limit,
                                         min_detection_confidence=min_detection_confidence,
                                         min_tracking_confidence=min_tracking_confidence)
                     # st.json(json_landmarks, expanded=False) # just for debugging
