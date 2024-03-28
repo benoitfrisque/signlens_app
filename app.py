@@ -1,15 +1,13 @@
 import time
 import streamlit as st
 import requests
-import json
-import cv2
+#import json
+#import cv2
 from video_utils import process_video_to_landmarks_json
 from streamlit_extras.app_logo import add_logo
 
-import base64
-from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
-
-
+#import base64
+#from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
 
 st.set_page_config(page_title="SignLens Demo",
                    page_icon="resources/signlens-favicon-black.png", layout="wide",
@@ -17,8 +15,8 @@ st.set_page_config(page_title="SignLens Demo",
                    menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
             'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
-            })
 
+            })
 
 # @st.cache_resource(allow_output_mutation=True)
 # def get_base64_of_bin_file(bin_file):
@@ -163,8 +161,7 @@ with col1:
         st.session_state.b2_disabled = False
         holder.video(video, start_time=0)
         title1.write(":green[Video uploaded successfully!] :tada:")
-        muted = st.checkbox("Mute")
-
+        #muted = st.checkbox("Mute")
         # webrtc_streamer(
         #     key="mute_sample",
         #     video_html_attrs=VideoHTMLAttributes(
@@ -230,10 +227,9 @@ with col2:
                     #st.metric("probability", f"{100*(result['probability']):.2f}%")
                     state = "complete"
                     time.sleep(1)
-                    st.balloons()
 
-                    #"Translation guess:"
-                    #st.header(f"{result['sign']}")
+
+
 
                     # probc = ":%s[%s]" % (probability_color, f"{100*(proba):.2f}%")
                     # #st.metric("probability",f"{100*(proba):.2f}%", probability_color)
@@ -243,11 +239,13 @@ with col2:
                     #"probability:"
                     #st.metric(value=proba,label="probability")
                     #st.text_area("Translation guess", sign, height=100)
-                    probability_color = "green" if proba > 50 else "yellow" if proba < 80 else "red"
+                    probability_color = "green" if proba > 70 else "red" if proba < 50 else "yellow"
                     if probability_color == "green":
                         st.write("is our best guess with probability", f":green[{proba}%]")
+                        st.balloons()
                     elif probability_color == "yellow":
                         st.write("is our best guess with probability", f":yellow[{proba}%]")
+                        st.balloons()
                     else:
                         st.write("is our best guess with probability", f":red[{proba}%]")
 
