@@ -9,7 +9,7 @@ from video_utils import process_video_to_landmarks_json
 #from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
 
 st.set_page_config(page_title="SignLens Demo",
-                   page_icon="resources/svg/logo-no-background.svg", layout="wide",
+                   page_icon="resources/signlens-favicon-white.png", layout="wide",
                    initial_sidebar_state="expanded",
                    menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
@@ -121,7 +121,7 @@ def clicked(button):
 # Sidebar content
 # logo = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
 #logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
-logo = "resources/signlens-high-resolution-logo-transparent_green.png"
+logo = "resources/svg/logo-no-background.svg"
 #st.sidebar.image(logo,use_column_width=True)
 st.sidebar.title("About SignLens")
 st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")

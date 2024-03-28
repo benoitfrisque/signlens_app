@@ -7,9 +7,9 @@ import random
 
 st.set_page_config(
     page_title="SignLens Play",
-    page_icon="resources/signlens-favicon-black.png",
+    page_icon="resources/signlens-favicon-white.png",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
     menu_items={
         'Report a bug': "https://github.com/benoitfrisque/signlens",
         'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
