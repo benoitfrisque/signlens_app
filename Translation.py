@@ -114,7 +114,10 @@ st.markdown(
                 background-color: rgba(255, 255, 255, 0.08); /* Add this line for light background */
                 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add this line for shading */
             }}
-
+            body {{
+            background-image: url({background_image});
+            background-size: cover;
+            }}
             [data-testid="stAppViewContainer"] > .main {{
             background-image: url({background_image});
             background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
@@ -122,11 +125,14 @@ st.markdown(
             background-repeat: no-repeat;
             }}
 
-                        .stApp {{
+                        .stApp > div:first-child {{
                 background-image: url({background_image});
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
+            }}
+            [data-testid="stAppViewContainer"] {{
+            background-color: transparent;
             }}
         </style>
         """,
@@ -194,13 +200,14 @@ with col1:
         # )
 
 with col2:
-    # with st.expander("Advanced settings", expanded=False):
-    #     min_detection_confidence = st.slider('Minimum detection confidence:', 0.1, 1.0, 0.5, 0.1)
-    #     min_tracking_confidence = st.slider('Minimum tracking confidence:', 0.1, 1.0, 0.5, 0.1)
-    #     frame_interval = st.slider('Frame interval:', 1, 10, 1, 1)
-    #     #frame_limit = st.number_input('Frame limit:', 0, 200, 0, 1)  #slider('Frame limit:', 0, 200, 0, 1)
+    with st.expander("Advanced settings", expanded=False):
+        min_detection_confidence = st.slider('Minimum detection confidence:', 0.1, 1.0, 0.5, 0.1)
+        min_tracking_confidence = st.slider('Minimum tracking confidence:', 0.1, 1.0, 0.5, 0.1)
+        frame_interval = st.slider('Frame interval:', 1, 10, 1, 1)
+        #frame_limit = st.number_input('Frame limit:', 0, 200, 0, 1)  #slider('Frame limit:', 0, 200, 0, 1)
+        pixabay = st.checkbox("Show pixabay image of the sign", key="pixabay", value=True)
     front_on = st.toggle('Front camera / webcam', False, key="front_on")
-    pixabay = st.checkbox("Show pixabay image of the sign", key="pixabay", value=True)
+
     st.subheader("Sign translation")
     #expander = st.expander("Optional controls")
     #expander.radio("Options", ["Translate", "Learn", "Live"])
