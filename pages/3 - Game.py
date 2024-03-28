@@ -95,15 +95,16 @@ if "random_index"  not in st.session_state:
     random.shuffle(final_options)
     st.session_state.options = final_options
 
-def submit_answer(option):
-
+def submit_answer(option,position=None):
+    #with st.container():
+    #position = st.empty()
     if option == st.session_state.correct_option:
-        st.write("<span style='color:green'>Correct!</span>", unsafe_allow_html=True)
+        position.write("<span style='color:green'>Correct!</span>", unsafe_allow_html=True)
         st.balloons()
     else:
-        st.write(f"You selected: <span style='color:red'>{option.capitalize()}</span>", unsafe_allow_html=True)
-        st.write(f"The correct option was: <span style='color:green'>{st.session_state.correct_option.capitalize()}</span>", unsafe_allow_html=True)
-
+        position.write(f"You selected: \t <span style='color:red'>{option.capitalize()}</span>  \n \
+            The correct option was: \t <span style='color:green'>{st.session_state.correct_option.capitalize()}</span>", unsafe_allow_html=True)
+        #position.write(f"#, unsafe_allow_html=True)
 
     st.session_state.answer_submitted = True
 
@@ -123,7 +124,8 @@ def display_game():
 
     for i, option in enumerate(st.session_state.options):
         column = col1 if i < 2 else col2
-        column.button(option.capitalize(), key=option, on_click=submit_answer,args=(option,), use_container_width=True)
+        bottom = st.empty()
+        column.button(option.capitalize(), key=option, on_click=submit_answer,args=(option,bottom), use_container_width=True)
 
 
 # Initialize session state

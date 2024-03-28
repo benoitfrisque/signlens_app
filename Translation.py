@@ -9,8 +9,8 @@ from video_utils import process_video_to_landmarks_json
 #from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
 
 st.set_page_config(page_title="SignLens Demo",
-                   page_icon="resources/signlens-favicon-black.png", layout="wide",
-                   initial_sidebar_state="collapsed",
+                   page_icon="resources/svg/logo-no-background.svg", layout="wide",
+                   initial_sidebar_state="expanded",
                    menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
             'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
