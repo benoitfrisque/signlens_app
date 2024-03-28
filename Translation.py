@@ -1,11 +1,10 @@
+import base64
 import time
 import streamlit as st
 import requests
 #import json
 #import cv2
 from video_utils import process_video_to_landmarks_json
-
-#import base64
 #from streamlit_webrtc import webrtc_streamer, VideoHTMLAttributes
 
 st.set_page_config(page_title="SignLens Demo",
@@ -66,15 +65,15 @@ NUM_CLASSES = 250
 
 #https://drive.google.com/file/d/1kzhZnny42X52bbAehiN94USuLKowmiJk/view?usp=drive_link
 #https://1drv.ms/i/s!AokgWCkazMPtpiqzTu31KLHslEj-?e=HNTSKG
+
+with open("resources/signlens-favicon-white.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+side_logo = f"data:image/png;base64,{encoded_string}"
+background_image = "resources/background_signlens.png"
+
 # Add custom CSS
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] > .main {
-    background-image: url("resources/background_signlens.png");
-    background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
-    background-position: center;
-    background-repeat: no-repeat;
-
 .reportview-container .main .block-container {
     padding-top: 1rem;
     padding-right: 2.5rem;
@@ -92,14 +91,48 @@ st.markdown("""
 h1 {
     color: #A980D6;
 }
-<!--
-body {
-background-image: url("https://images.unsplash.com/photo-1542281286-9e0a16bb7366");
-background-size: cover;
--->
 }
 </style>
 """, unsafe_allow_html=True)
+
+#url = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
+#url = "resources/signlens-high-resolution-logo-black.png"
+
+st.markdown(
+        f"""
+        <style>
+            [data-testid="stSidebarNav"] + div {{
+                position:absolute;
+                bottom: 0;
+                height:50%;
+                background-image: url({side_logo});
+                background-size: 50% auto;
+                background-repeat: no-repeat;
+                background-position-x: center;
+                background-position-y: bottom;
+                border-bottom: 2px solid black;
+                background-color: rgba(255, 255, 255, 0.08); /* Add this line for light background */
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add this line for shading */
+            }}
+
+            [data-testid="stAppViewContainer"] > .main {{
+            background-image: url({background_image});
+            background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
+            background-position: center;
+            background-repeat: no-repeat;
+            }}
+
+                        .stApp {{
+                background-image: url({background_image});
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 # .stButton > button:hover {
 #     background-color: #c91a2c; #4caf50;
@@ -119,8 +152,6 @@ def clicked(button):
     st.session_state.clicked[button] = True
 
 # Sidebar content
-# logo = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
-#logo = "https://www.freepik.com/free-vector/technology-circle-ai-abstract-vector-computer-vision-design_18236528.htm#query=cyborg%20eye&position=6&from_view=keyword&track=ais&uuid=6aae1df3-0c6e-49d5-a59f-300d5c4bd73d"
 logo = "resources/svg/logo-no-background.svg"
 #st.sidebar.image(logo,use_column_width=True)
 st.sidebar.title("About SignLens")
@@ -128,12 +159,13 @@ st.sidebar.caption("An app for translating sign language, but also aid in learni
 
 # Main content
 #st.title("SignLens Demo")
-st.image(logo,width=300)
+
 col1, col2 = st.columns([2, 1])
 
 st.session_state.b2_disabled = True
 
 with col1:
+    st.image(logo,width=300)
     st.subheader("Upload a video to translate sign to text")
     holder = st.empty()
     title1 = st.empty()
@@ -162,15 +194,13 @@ with col1:
         # )
 
 with col2:
-    with st.expander("Advanced settings", expanded=False):
-        min_detection_confidence = st.slider('Minimum detection confidence:', 0.1, 1.0, 0.5, 0.1)
-        min_tracking_confidence = st.slider('Minimum tracking confidence:', 0.1, 1.0, 0.5, 0.1)
-        frame_interval = st.slider('Frame interval:', 1, 10, 1, 1)
-        #frame_limit = st.number_input('Frame limit:', 0, 200, 0, 1)  #slider('Frame limit:', 0, 200, 0, 1)
-    front_on = st.toggle('Front camera (mirrored)', False, key="front_on")
+    # with st.expander("Advanced settings", expanded=False):
+    #     min_detection_confidence = st.slider('Minimum detection confidence:', 0.1, 1.0, 0.5, 0.1)
+    #     min_tracking_confidence = st.slider('Minimum tracking confidence:', 0.1, 1.0, 0.5, 0.1)
+    #     frame_interval = st.slider('Frame interval:', 1, 10, 1, 1)
+    #     #frame_limit = st.number_input('Frame limit:', 0, 200, 0, 1)  #slider('Frame limit:', 0, 200, 0, 1)
+    front_on = st.toggle('Front camera / webcam', False, key="front_on")
     pixabay = st.checkbox("Show pixabay image of the sign", key="pixabay", value=True)
-    #if front_on:
-    #    st.write('(not mirrored)')
     st.subheader("Sign translation")
     #expander = st.expander("Optional controls")
     #expander.radio("Options", ["Translate", "Learn", "Live"])

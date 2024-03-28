@@ -134,7 +134,7 @@ if 'answer_submitted' not in st.session_state:
 
 # Check if an option has been selected
 if st.session_state.answer_submitted:
-    time.sleep(1)
+    time.sleep(2.5)
     # If an option has been selected, display the correct option and reset state
     st.session_state.answer_submitted = False
     st.session_state.correct_option = None
