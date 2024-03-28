@@ -1,3 +1,4 @@
+import base64
 import streamlit as st
 import os
 import numpy as np
@@ -15,8 +16,80 @@ st.set_page_config(
         'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
     }
 )
+with open("resources/signlens-favicon-white.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+side_logo = f"data:image/png;base64,{encoded_string}"
+background_image = "resources/background_signlens.png"
+
+# Add custom CSS
+st.markdown("""
+<style>
+.reportview-container .main .block-container {
+    padding-top: 1rem;
+    padding-right: 2.5rem;
+    padding-left: 2.5rem;
+    padding-bottom: 1rem;
+}
+
+.sidebar .sidebar-content {
+    padding-top: 1rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+}
+
+h1 {
+    color: #A980D6;
+}
+}
+</style>
+""", unsafe_allow_html=True)
+
+#url = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
+#url = "resources/signlens-high-resolution-logo-black.png"
+
+st.markdown(
+        f"""
+        <style>
+            [data-testid="stSidebarNav"] + div {{
+                position:absolute;
+                bottom: 0;
+                height:50%;
+                background-image: url({side_logo});
+                background-size: 50% auto;
+                background-repeat: no-repeat;
+                background-position-x: center;
+                background-position-y: bottom;
+                border-bottom: 2px solid black;
+                background-color: rgba(255, 255, 255, 0.08); /* Add this line for light background */
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add this line for shading */
+            }}
+
+            [data-testid="stAppViewContainer"] > .main {{
+            background-image: url({background_image});
+            background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
+            background-position: center;
+            background-repeat: no-repeat;
+            }}
+
+                        .stApp > div:first-child {{
+                background-image: url({background_image});
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }}
+            [data-testid="stAppViewContainer"] {{
+            background-color: transparent;
+            }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 st.title("ASL Learning Game")
+
+st.sidebar.title("About SignLens")
+st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 # Load CSV data
 @st.cache_data
@@ -99,11 +172,12 @@ def submit_answer(option,position=None):
     #with st.container():
     #position = st.empty()
     if option == st.session_state.correct_option:
-        position.write("<span style='color:green'>Correct!</span>", unsafe_allow_html=True)
+        position.write("<center><span style='color:green; font-size:x-large'>Correct!</span></center>", unsafe_allow_html=True)
         st.balloons()
-    else:
-        position.write(f"You selected: \t <span style='color:red'>{option.capitalize()}</span>  \n \
-            The correct option was: \t <span style='color:green'>{st.session_state.correct_option.capitalize()}</span>", unsafe_allow_html=True)
+    else:  #<br>
+        position.write(f"<center>You selected: \t <span style='color:red; font-size:x-large'>{option.capitalize()}</span> &nbsp;&nbsp;&nbsp;&nbsp; \n \
+            The correct option was: \t <span style='color:green; font-size:x-large'>{st.session_state.correct_option.capitalize()}</span></center>",
+            unsafe_allow_html=True)
         #position.write(f"#, unsafe_allow_html=True)
 
     st.session_state.answer_submitted = True
@@ -113,9 +187,12 @@ def submit_answer(option,position=None):
 # Function to display the game options
 def display_game():
     st.subheader("Watch the Sign")
-    col1, col2, col3 = st.columns([0.25, 0.8, 0.2])
-    with col2:
-        st.video(st.session_state.url)
+
+    #container.video(data=VIDEO_DATA)
+    _, col2, _ = st.columns([0.25, 0.5, 0.25])
+    #with col2:
+        #st.video(st.session_state.url)
+    col2.video(st.session_state.url)
 
     st.subheader("Which Sign Is It?")
 
@@ -134,7 +211,7 @@ if 'answer_submitted' not in st.session_state:
 
 # Check if an option has been selected
 if st.session_state.answer_submitted:
-    time.sleep(2.5)
+    time.sleep(3)
     # If an option has been selected, display the correct option and reset state
     st.session_state.answer_submitted = False
     st.session_state.correct_option = None
