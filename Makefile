@@ -22,7 +22,7 @@ install_requirements:
 
 streamlit:
 #	-@streamlit run 'Video Translation.py'
-	-@streamlit run app.py
+	-@streamlit run Translation.py
 
 
 # ----------------------------------
