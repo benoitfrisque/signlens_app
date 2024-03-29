@@ -246,8 +246,8 @@ with col2:
                     #status_text.status("Requesting API response...")
 
                     headers = {'Content-Type': 'application/json'}
-                    response = requests.post("http://127.0.0.1:8000/predict",
-                                            #'https://signlens-pait7pkgma-oa.a.run.app/predict',
+                    response = requests.post(#"http://127.0.0.1:8000/predict",
+                                            'https://signlens-pait7pkgma-oa.a.run.app/predict',
                                             headers=headers, json=json_landmarks, timeout=120)
 
                 elapsed_time = time.time() - start_time
