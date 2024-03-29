@@ -9,7 +9,7 @@ from video_utils import process_video_to_landmarks_json
 
 st.set_page_config(page_title="SignLens Demo",
                    page_icon="resources/signlens-favicon-white.png", layout="wide",
-                   initial_sidebar_state="expanded",
+                   initial_sidebar_state="auto",
                    menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
             'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
@@ -280,7 +280,7 @@ with col2:
                     else:
                         st.write("is our best guess with probability", f":red[{proba}%]")
 
-                    search_term = result['sign']
+                    search_term = result['sign'].split()[0]
                     # Pixabay API
 
                     if pixabay:
@@ -292,23 +292,25 @@ with col2:
                             image_data = response.json()
                         # exception handling
                         except KeyError:
-                            st.error("Error: The API did not return valid image data.")
+                            print("Error: The API did not return valid image data.")
                         except requests.Timeout:
-                            st.error("Error: Request to the API timed out. Please try again later.")
+                            print("Error: Request to the API timed out. Please try again later.")
+                        except Exception as e:
+                            print("Error: An unexpected error occurred: ", e)
                         else:
                             # Check if the "hits" list is empty
                             if "hits" in image_data and len(image_data["hits"]) > 0:
                                 img_url = image_data["hits"][0]["webformatURL"]
                                 st.image(img_url)
                             else:
-                                st.error("Error: No images found for the given search term.")
+                                print("Error: No images found for the given search term.")
 
                 else:
                     status_text.text(f"API Error: {response.status_code}")
-                    st.error(f"API Error: {response.status_code}")
+                    print(f"API Error: {response.status_code}")
                     state = "error"
 
             except Exception as e:
                 status_text.text(f"API Error: {e}")
-                st.error(f"API Error: {e}")
+                print(f"API Error: {e}")
                 state = "error"
