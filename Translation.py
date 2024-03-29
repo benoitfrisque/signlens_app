@@ -289,8 +289,13 @@ with col2:
                             response = requests.get(url, timeout=60)
                             image_data = response.json()
                             # image_data
-                            img_url = image_data["hits"][0]["webformatURL"]
-                            st.image(img_url)
+                            # Check if the "hits" list is empty
+                            if "hits" in image_data and len(image_data["hits"]) > 0:
+                                img_url = image_data["hits"][0]["webformatURL"]
+                                st.image(img_url)
+                            else:
+                                st.error("Error: No images found for the given search term.")
+
                     except KeyError:
                         st.error("Error: The API did not return valid image data.")
                     except requests.Timeout:
