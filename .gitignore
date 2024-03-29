@@ -20,6 +20,7 @@ __MACOSX
 *.sqlite
 *.h5
 *.mp4
+*.toml
 
 # IDE #
 *.vscode

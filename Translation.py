@@ -9,7 +9,7 @@ from video_utils import process_video_to_landmarks_json
 
 st.set_page_config(page_title="SignLens Demo",
                    page_icon="resources/signlens-favicon-white.png", layout="wide",
-                   initial_sidebar_state="expanded",
+                   initial_sidebar_state="auto",
                    menu_items={
             'Report a bug': "https://github.com/benoitfrisque/signlens",
             'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
@@ -182,15 +182,22 @@ with col1:
 
         video = st.file_uploader("Select video file", label_visibility="collapsed", key="upload_video", help="Upload a video file",
                                  #disabled=~st.session_state.b2_disabled,
-                                 type=["mp4", "mov", "avi", "mkv",
-                                                         #"m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
-                                                         "asf", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
+                                 type=["mp4", "mov", "avi", "mkv", "mpg", "mpeg", "asf",], accept_multiple_files=False)
+                                                         # "m2v", "ts", "m2ts", "mts", "vob","m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif",
         st.session_state.b2_disabled = True
         st.session_state.new_video = True
 
     if video:
         st.session_state.b2_disabled = False
         holder.video(video, start_time=0)
+        #st.session_state.url = video
+        # Use st.markdown to display the video
+        # st.markdown(f'''
+        #     <div style="position:relative; padding-top:56.25%;">
+        #         <iframe src="{st.session_state.url}?autoplay=1&loop=1" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="no" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>
+        #         </iframe>
+        #     </div>
+        # ''', unsafe_allow_html=True)
         title1.write(":green[Video uploaded successfully!] :tada:")
         # webrtc_streamer(
         #     key="mute_sample",
@@ -209,10 +216,6 @@ with col2:
     front_on = st.toggle('Front camera / webcam', False, key="front_on")
 
     st.subheader("Sign translation")
-    #expander = st.expander("Optional controls")
-    #expander.radio("Options", ["Translate", "Learn", "Live"])
-    #if st.button("Push to translate"):
-    # Add a button to start the prediction
     # Conditional based on value in session state, not the output
     button_trans = st.button("Start Translation", on_click=clicked, args=[2],
               type="primary", disabled=st.session_state.b2_disabled)
@@ -277,23 +280,37 @@ with col2:
                     else:
                         st.write("is our best guess with probability", f":red[{proba}%]")
 
-                    search_term = result['sign']
+                    search_term = result['sign'].split()[0]
                     # Pixabay API
+
                     if pixabay:
                         api_key = str(st.secrets.api_key)
                         url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
                         response = requests.get(url, timeout=60)
-                        image_data = response.json()
-                        #image_data
-                        img_url = image_data["hits"][0]["webformatURL"]
-                        st.image(img_url)
+                        try:
+                            response.raise_for_status()
+                            image_data = response.json()
+                        # exception handling
+                        except KeyError:
+                            print("Error: The API did not return valid image data.")
+                        except requests.Timeout:
+                            print("Error: Request to the API timed out. Please try again later.")
+                        except Exception as e:
+                            print("Error: An unexpected error occurred: ", e)
+                        else:
+                            # Check if the "hits" list is empty
+                            if "hits" in image_data and len(image_data["hits"]) > 0:
+                                img_url = image_data["hits"][0]["webformatURL"]
+                                st.image(img_url)
+                            else:
+                                print("Error: No images found for the given search term.")
 
                 else:
                     status_text.text(f"API Error: {response.status_code}")
-                    st.error(f"API Error: {response.status_code}")
+                    print(f"API Error: {response.status_code}")
                     state = "error"
 
             except Exception as e:
                 status_text.text(f"API Error: {e}")
-                st.error(f"API Error: {e}")
+                print(f"API Error: {e}")
                 state = "error"
