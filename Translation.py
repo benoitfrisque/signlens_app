@@ -282,24 +282,26 @@ with col2:
 
                     search_term = result['sign']
                     # Pixabay API
-                    try:
-                        if pixabay:
-                            api_key = str(st.secrets.api_key)
-                            url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
-                            response = requests.get(url, timeout=60)
+
+                    if pixabay:
+                        api_key = str(st.secrets.api_key)
+                        url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
+                        response = requests.get(url, timeout=60)
+                        try:
+                            response.raise_for_status()
                             image_data = response.json()
-                            # image_data
+                        # exception handling
+                        except KeyError:
+                            st.error("Error: The API did not return valid image data.")
+                        except requests.Timeout:
+                            st.error("Error: Request to the API timed out. Please try again later.")
+                        else:
                             # Check if the "hits" list is empty
                             if "hits" in image_data and len(image_data["hits"]) > 0:
                                 img_url = image_data["hits"][0]["webformatURL"]
                                 st.image(img_url)
                             else:
                                 st.error("Error: No images found for the given search term.")
-
-                    except KeyError:
-                        st.error("Error: The API did not return valid image data.")
-                    except requests.Timeout:
-                        st.error("Error: Request to the API timed out. Please try again later.")
 
                 else:
                     status_text.text(f"API Error: {response.status_code}")
