@@ -130,7 +130,7 @@ def select_random_video():
     # Check if correct_option is already in unique_options
     if st.session_state.correct_option not in unique_options:
         # If not, replace a random element with correct_option
-        replace_index = np.random.randint(0, len(unique_options))
+        replace_index = np.random.randint(0, 3)
         unique_options[replace_index] = st.session_state.correct_option
 
     # Select the first four unique options
