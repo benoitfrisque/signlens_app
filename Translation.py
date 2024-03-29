@@ -182,15 +182,22 @@ with col1:
 
         video = st.file_uploader("Select video file", label_visibility="collapsed", key="upload_video", help="Upload a video file",
                                  #disabled=~st.session_state.b2_disabled,
-                                 type=["mp4", "mov", "avi", "mkv",
-                                                         #"m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif", "mpg", "mpeg",
-                                                         "asf", "m2v", "ts", "m2ts", "mts", "vob"], accept_multiple_files=False)
+                                 type=["mp4", "mov", "avi", "mkv", "mpg", "mpeg", "asf",], accept_multiple_files=False)
+                                                         # "m2v", "ts", "m2ts", "mts", "vob","m4v", "mkv", "wmv", "flv", "webm", "3gp", "ogg", "ogv", "gif",
         st.session_state.b2_disabled = True
         st.session_state.new_video = True
 
     if video:
         st.session_state.b2_disabled = False
         holder.video(video, start_time=0)
+        #st.session_state.url = video
+        # Use st.markdown to display the video
+        # st.markdown(f'''
+        #     <div style="position:relative; padding-top:56.25%;">
+        #         <iframe src="{st.session_state.url}?autoplay=1&loop=1" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="no" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>
+        #         </iframe>
+        #     </div>
+        # ''', unsafe_allow_html=True)
         title1.write(":green[Video uploaded successfully!] :tada:")
         # webrtc_streamer(
         #     key="mute_sample",
@@ -209,10 +216,6 @@ with col2:
     front_on = st.toggle('Front camera / webcam', False, key="front_on")
 
     st.subheader("Sign translation")
-    #expander = st.expander("Optional controls")
-    #expander.radio("Options", ["Translate", "Learn", "Live"])
-    #if st.button("Push to translate"):
-    # Add a button to start the prediction
     # Conditional based on value in session state, not the output
     button_trans = st.button("Start Translation", on_click=clicked, args=[2],
               type="primary", disabled=st.session_state.b2_disabled)
@@ -243,8 +246,8 @@ with col2:
                     #status_text.status("Requesting API response...")
 
                     headers = {'Content-Type': 'application/json'}
-                    response = requests.post(#"http://127.0.0.1:8000/predict",
-                                            'https://signlens-pait7pkgma-oa.a.run.app/predict',
+                    response = requests.post("http://127.0.0.1:8000/predict",
+                                            #'https://signlens-pait7pkgma-oa.a.run.app/predict',
                                             headers=headers, json=json_landmarks, timeout=120)
 
                 elapsed_time = time.time() - start_time
@@ -279,14 +282,19 @@ with col2:
 
                     search_term = result['sign']
                     # Pixabay API
-                    if pixabay:
-                        api_key = str(st.secrets.api_key)
-                        url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
-                        response = requests.get(url, timeout=60)
-                        image_data = response.json()
-                        #image_data
-                        img_url = image_data["hits"][0]["webformatURL"]
-                        st.image(img_url)
+                    try:
+                        if pixabay:
+                            api_key = str(st.secrets.api_key)
+                            url = "https://pixabay.com/api/?key=%s&q=%s&image_type=photo&pretty=true" % (str(api_key),search_term)
+                            response = requests.get(url, timeout=60)
+                            image_data = response.json()
+                            # image_data
+                            img_url = image_data["hits"][0]["webformatURL"]
+                            st.image(img_url)
+                    except KeyError:
+                        st.error("Error: The API did not return valid image data.")
+                    except requests.Timeout:
+                        st.error("Error: Request to the API timed out. Please try again later.")
 
                 else:
                     status_text.text(f"API Error: {response.status_code}")
