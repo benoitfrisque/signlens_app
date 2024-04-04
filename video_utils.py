@@ -24,10 +24,15 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
         frame_interval (int, optional): The interval between processed frames. Defaults to 1.
         frame_limit (int, optional): The maximum number of frames to process. Defaults to None.
         rear_camera (bool, optional): Whether the video was recorded with a rear camera. Defaults to True.
+        min_detection_confidence (float, optional): Minimum confidence value ([0.0, 1.0])
+            from the pose detection model for the detection to be considered successful. Defaults to 0.5.
+        min_tracking_confidence (float, optional): Minimum confidence value ([0.0, 1.0])
+            from the pose tracking model for the tracking to be considered successful. Defaults to 0.5.
 
     Returns:
         list: A list of dictionaries containing the extracted landmarks for each frame.
     """
+
     # Save the uploaded file to a temporary location
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(video_file.getbuffer())
@@ -42,13 +47,15 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
     empty_landmarks_list_hand = create_empty_landmarks_list(N_LANDMARKS_HAND)
     empty_landmarks_list_pose = create_empty_landmarks_list(N_LANDMARKS_POSE)
 
-
+    # Initialize the mediapipe pose and hands models
     with mp_pose.Pose(static_image_mode=False,
                 min_detection_confidence=min_detection_confidence,
                 min_tracking_confidence=min_tracking_confidence) as pose, \
             mp_hands.Hands(static_image_mode=False, max_num_hands=2,
                 min_detection_confidence=min_detection_confidence,
                 min_tracking_confidence=min_tracking_confidence) as hands:
+
+        # Read video frames
         while cap.isOpened():
             success, frame = cap.read()
             if not success:
@@ -59,7 +66,8 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
                 frame_number += 1
                 continue
 
-            if not rear_camera: # we mirror videos from front camera
+            # Mirror videos from front camera
+            if not rear_camera:
                 frame = cv2.flip(frame, 1)
 
             # Convert the BGR image to RGB
@@ -93,7 +101,7 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
                     elif hand_side == 'right':
                         landmarks_right_hand = hand_landmarks_list[idx]
 
-
+            # Serialize landmarks for json
             serialized_pose = serialize_landmarks(landmarks_pose)
             serialized_left_hand = serialize_landmarks(landmarks_left_hand)
             serialized_right_hand = serialize_landmarks(landmarks_right_hand)
@@ -169,22 +177,32 @@ def create_empty_landmarks_list(n_landmarks):
 
 
 def get_hand_sides(hands_result):
-    # Get handedness of each hand
-    hand_landmarks_list = hands_result.multi_hand_landmarks
+    """
+    Determines the sides of the hands based on the given hands_result.
 
+    Args:
+        hands_result (HandsResult): The result of hand detection and tracking.
+
+    Returns:
+        list: A list of strings representing the sides of the hands. Possible values are 'left' and 'right'.
+              If no hands are detected, an empty list is returned.
+              If only one hand is detected, the side of the hand is determined and returned as a single-element list.
+              If two hands are detected, the sides of the hands are determined and returned as a two-element list.
+              The order of the elements in the list corresponds to the order of the hands in the hands_result.
+    """
+    hand_landmarks_list = hands_result.multi_hand_landmarks
 
     if len(hand_landmarks_list) == 0:
         return []
-
     elif len(hand_landmarks_list) == 1:
         handedness_dict = MessageToDict(hands_result.multi_handedness[0])
         hand_side = handedness_dict['classification'][0]['label'].lower()
 
+        # We return the opposite side because this version of Mediaipe assumes videos with front camera
         if hand_side == 'left':
-            return ['right'] # inverted as this version of Mediaipe assumes mirrored videos
+            return ['right']
         else:
             return ['left']
-
     elif len(hand_landmarks_list) == 2:
         x_min0 = min([landmark.x for landmark in hand_landmarks_list[0]])
         x_min1 = min([landmark.x for landmark in hand_landmarks_list[1]])
