@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import time
 import random
-from streamlit_extras.let_it_rain import rain
 
 st.set_page_config(
     page_title="SignLens Play",
@@ -17,10 +16,6 @@ st.set_page_config(
         'About': "# This is our final project for Le Wagon Data Science Bootcamp!"
     }
 )
-with open("resources/signlens-favicon-white.png", "rb") as image_file:
-    encoded_string = base64.b64encode(image_file.read()).decode()
-side_logo = f"data:image/png;base64,{encoded_string}"
-background_image = "resources/background_signlens.png"
 
 # Add custom CSS
 st.markdown("""
@@ -46,51 +41,61 @@ h1 {
 </style>
 """, unsafe_allow_html=True)
 
-#url = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
-#url = "resources/signlens-high-resolution-logo-black.png"
+# Sidebar content
+with open("resources/signlens-favicon-white.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+side_logo = f"data:image/png;base64,{encoded_string}"
+
+st.sidebar.title("About SignLens")
+st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 st.markdown(
-        f"""
-        <style>
-            [data-testid="stSidebarNav"] + div {{
+    f"""
+    <style>
+        /* Adjust sidebar height based on its content */
+        .sidebar .sidebar-content {{
+            height: auto !important;
+            transition: height 0.5s;
+            position: relative; /* Make the sidebar content positioning relative */
+        }}
+
+        /* Text styling */
+        .about-text {{
+            text-align: center;
+            margin-top: 10px; /* Adjust margin-top to create space between text and image */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }}
+
+        /* Logo styling */
+        [data-testid="stSidebarNav"] + div {{
                 position:absolute;
                 bottom: 0;
-                height:50%;
+                left: 0;
+                width: 100%;
+                height: 50%;
                 background-image: url({side_logo});
                 background-size: 50% auto;
                 background-repeat: no-repeat;
                 background-position-x: center;
                 background-position-y: bottom;
-                border-bottom: 2px solid black;
                 background-color: rgba(255, 255, 255, 0.08); /* Add this line for light background */
                 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add this line for shading */
             }}
 
-            [data-testid="stAppViewContainer"] > .main {{
-            background-image: url({background_image});
-            background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
-            background-position: center;
-            background-repeat: no-repeat;
-            }}
+        /* Hide the image when sidebar is collapsed */
+        .sidebar.collapsed [data-testid="stSidebarNav"] + div {{
+            display: none;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-                        .stApp > div:first-child {{
-                background-image: url({background_image});
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-            }}
-            [data-testid="stAppViewContainer"] {{
-            background-color: transparent;
-            }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 
 st.title("ASL Learning Game")
-
-st.sidebar.title("About SignLens")
-st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 # Load CSV data
 @st.cache_data
@@ -131,7 +136,7 @@ def select_random_video():
     # Select the first four unique options
     final_options = unique_options[:4]
 
-        # Check if correct_option is already in final_options
+    # Check if correct_option is already in final_options
     if st.session_state.correct_option not in final_options:
         # If not, replace a random element with correct_option
         replace_index = np.random.randint(0, 4)
@@ -141,40 +146,12 @@ def select_random_video():
     random.shuffle(final_options)
     st.session_state.options = final_options
 
-    return
-
 
 if "random_index"  not in st.session_state:
-    st.session_state.random_index = np.random.randint(len(data))
-    print(st.session_state.random_index )
+    select_random_video()
 
-    random_video_data = data.iloc[st.session_state.random_index]
-    st.session_state.url = random_video_data['url']
-
-    st.session_state.correct_option = random_video_data['sign']
-    # Randomly choose options
-    options = np.random.choice(unique_signs, size=4, replace=False)  # Choose 3 random options
-
-    # Concatenate correct option and randomly chosen options
-    options = np.append(st.session_state.correct_option, options)
-
-    # Remove duplicates
-    unique_options = list(set(options))
-
-    # Check if correct_option is already in unique_options
-    if st.session_state.correct_option not in unique_options:
-        # If not, replace a random element with correct_option
-        replace_index = np.random.randint(0, len(unique_options))
-        unique_options[replace_index] = st.session_state.correct_option
-
-    # Select the first four unique options
-    final_options = unique_options[:4]
-    random.shuffle(final_options)
-    st.session_state.options = final_options
 
 def submit_answer(option,position=None):
-    #with st.container():
-    #position = st.empty()
     if option == st.session_state.correct_option:
         position.write("<center><span style='color:green; font-size:x-large'>Correct!</span></center>", unsafe_allow_html=True)
         st.balloons()
@@ -182,18 +159,6 @@ def submit_answer(option,position=None):
         position.write(f"<center>You selected: \t <span style='color:red; font-size:x-large'>{option.capitalize()}</span> &nbsp;&nbsp;&nbsp;&nbsp; \n \
             The correct option was: \t <span style='color:green; font-size:x-large'>{st.session_state.correct_option.capitalize()}</span></center>",
             unsafe_allow_html=True)
-        #position.write(f"#, unsafe_allow_html=True)
-        #st.snow()
-        # import time
-        # start_time = time.time()
-        # if time.time() - start_time < 3:
-        #     time.sleep(0.1)
-        #     rain(
-        #     emoji="👎        💩",
-        #     font_size=44,
-        #     falling_speed=3,
-        #     animation_length=1
-        #     )
 
     st.session_state.answer_submitted = True
 
@@ -204,9 +169,6 @@ def display_game():
     #container.video(data=VIDEO_DATA)
     st.subheader("Watch the Sign")
     col1, col2, _ = st.columns([0.25, 0.7, 0.3])
-    #with col2:
-        #st.video(st.session_state.url)
-    #col1.subheader("Watch the Sign")
     col2.video(st.session_state.url)
 
     st.subheader("Which Sign Is It?")

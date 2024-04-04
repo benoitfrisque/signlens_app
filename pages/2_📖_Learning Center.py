@@ -15,14 +15,6 @@ st.set_page_config(
             }
 )
 
-st.sidebar.title("About SignLens")
-st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
-
-with open("resources/signlens-favicon-white.png", "rb") as image_file:
-    encoded_string = base64.b64encode(image_file.read()).decode()
-side_logo = f"data:image/png;base64,{encoded_string}"
-background_image = "resources/background_signlens.png"
-
 # Add custom CSS
 st.markdown("""
 <style>
@@ -47,48 +39,59 @@ h1 {
 </style>
 """, unsafe_allow_html=True)
 
-#url = "https://img.freepik.com/free-photo/sign-language-collage-design_23-2150528183.jpg?t=st=1711466807~exp=1711470407~hmac=c1c1a9a378d0a17254e6cf298fb262c2883e305f2ee08999e0771f76be98eeb4&w=900"
-#url = "resources/signlens-high-resolution-logo-black.png"
+# Sidebar content
+with open("resources/signlens-favicon-white.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+side_logo = f"data:image/png;base64,{encoded_string}"
+
+st.sidebar.title("About SignLens")
+st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 st.markdown(
-        f"""
-        <style>
-            [data-testid="stSidebarNav"] + div {{
+    f"""
+    <style>
+        /* Adjust sidebar height based on its content */
+        .sidebar .sidebar-content {{
+            height: auto !important;
+            transition: height 0.5s;
+            position: relative; /* Make the sidebar content positioning relative */
+        }}
+
+        /* Text styling */
+        .about-text {{
+            text-align: center;
+            margin-top: 10px; /* Adjust margin-top to create space between text and image */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }}
+
+        /* Logo styling */
+        [data-testid="stSidebarNav"] + div {{
                 position:absolute;
                 bottom: 0;
-                height:50%;
+                left: 0;
+                width: 100%;
+                height: 50%;
                 background-image: url({side_logo});
                 background-size: 50% auto;
                 background-repeat: no-repeat;
                 background-position-x: center;
                 background-position-y: bottom;
-                border-bottom: 2px solid black;
                 background-color: rgba(255, 255, 255, 0.08); /* Add this line for light background */
                 box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add this line for shading */
             }}
 
-            [data-testid="stAppViewContainer"] > .main {{
-            background-image: url({background_image});
-            background-size: 100vw 100vh;  # This sets the size to cover 100% of the viewport width and height
-            background-position: center;
-            background-repeat: no-repeat;
-            }}
+        /* Hide the image when sidebar is collapsed */
+        .sidebar.collapsed [data-testid="stSidebarNav"] + div {{
+            display: none;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-                        .stApp > div:first-child {{
-                background-image: url({background_image});
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-            }}
-            [data-testid="stAppViewContainer"] {{
-            background-color: transparent;
-            }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-# Streamlit UI
 st.title("ASL Learning Center")
 ITEMS_PER_PAGE = 9
 SIGNS_PER_PAGE = 3

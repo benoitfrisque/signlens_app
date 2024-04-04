@@ -19,11 +19,6 @@ st.set_page_config(page_title="SignLens Demo",
 # Constants
 NUM_CLASSES = 250
 
-
-with open("resources/signlens-favicon-white.png", "rb") as image_file:
-    encoded_string = base64.b64encode(image_file.read()).decode()
-side_logo = f"data:image/png;base64,{encoded_string}"
-
 # Add custom CSS
 st.markdown("""
 <style>
@@ -47,6 +42,15 @@ h1 {
 }
 </style>
 """, unsafe_allow_html=True)
+
+
+# Sidebar content
+with open("resources/signlens-favicon-white.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+side_logo = f"data:image/png;base64,{encoded_string}"
+
+st.sidebar.title("About SignLens")
+st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 
 st.markdown(
@@ -73,8 +77,9 @@ st.markdown(
         [data-testid="stSidebarNav"] + div {{
                 position:absolute;
                 bottom: 0;
-                height: 50%;
+                left: 0;
                 width: 100%;
+                height: 50%;
                 background-image: url({side_logo});
                 background-size: 50% auto;
                 background-repeat: no-repeat;
@@ -93,10 +98,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Sidebar content
+
+
 logo = "resources/svg/logo-no-background.svg"
-st.sidebar.title("About SignLens")
-st.sidebar.caption("An app for translating sign language, but also aid in learning it. Upload a video of sign language gestures and click the button to translate the signs to text!")
 
 
 # Initialize the key in session state
