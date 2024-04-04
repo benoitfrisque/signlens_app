@@ -1,14 +1,8 @@
 numpy
-opencv-python-headless #==4.5.5.64
+opencv-python-headless
 streamlit
 streamlit-webrtc
-#av
 requests
-#PIL
-#io
-# mediapipe==0.10.9 # later versions are not supporting pose estimation?
 mediapipe
-#json
-## formatting
 streamlit-extras
 validators
