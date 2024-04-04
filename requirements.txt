@@ -1,8 +1,8 @@
-numpy
-opencv-python-headless
-streamlit
-streamlit-webrtc
-requests
-mediapipe
-streamlit-extras
-validators
+mediapipe==0.10.11
+numpy==1.26.4
+opencv-python-headless==4.9.0.80
+requests==2.31.0
+streamlit==1.32.2
+streamlit-extras==0.4.0
+streamlit-webrtc==0.47.6
+validators==0.24.0
