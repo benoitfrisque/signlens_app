@@ -51,7 +51,7 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
     with mp_pose.Pose(static_image_mode=False,
                 min_detection_confidence=min_detection_confidence,
                 min_tracking_confidence=min_tracking_confidence) as pose, \
-            mp_hands.Hands(static_image_mode=False, max_num_hands=2,
+         mp_hands.Hands(static_image_mode=False, max_num_hands=2,
                 min_detection_confidence=min_detection_confidence,
                 min_tracking_confidence=min_tracking_confidence) as hands:
 
@@ -93,7 +93,8 @@ def process_video_to_landmarks_json(video_file, frame_interval=1, frame_limit=No
                 hand_landmarks_list = hands_result.multi_hand_landmarks
                 hand_sides_list = get_hand_sides(hands_result)
 
-                for idx in range(len(hand_landmarks_list)):
+                for idx in range(len(hand_sides_list)):
+
                     hand_side = hand_sides_list[idx]
 
                     if hand_side == 'left':
@@ -203,9 +204,10 @@ def get_hand_sides(hands_result):
             return ['right']
         else:
             return ['left']
-    elif len(hand_landmarks_list) == 2:
-        x_min0 = min([landmark.x for landmark in hand_landmarks_list[0]])
-        x_min1 = min([landmark.x for landmark in hand_landmarks_list[1]])
+    # elif len(hand_landmarks_list) == 2:
+    else: # actually there are siometimes more than 3 hands dectected, but we return only 2
+        x_min0 = min([landmark.x for landmark in hand_landmarks_list[0].landmark])
+        x_min1 = min([landmark.x for landmark in hand_landmarks_list[1].landmark])
 
         if x_min0 < x_min1:
             return ["right", "left"]
