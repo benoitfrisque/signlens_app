@@ -4,6 +4,11 @@ SignLens is a project that leverages the power of Deep Learning to classify Amer
 
 This repository hosts the frontend for the intuitive Streamlit interface, providing seamless accessibility: [SignLens Streamlit Interface](https://signlens.streamlit.app/)
 
+Here is a preview:
+
+https://github.com/benoitfrisque/signlens_app/assets/150936779/4cbce2b9-217b-4f3c-9f81-ec4b64e5f8e8
+
+
 ## Deep Learning Classification Model
 
 SignLens uses an approach where videos are initially transformed into JSON files containing [Mediapipe](https://github.com/google/mediapipe/blob/master/docs/solutions/holistic.md) landmarks. Subsequently, these JSON files are transmitted to an API housing the landmark model, which returns accurate classifications. The development of both the model and the API is detailed [here](https://github.com/benoitfrisque/signlens).
